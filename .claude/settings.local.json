@@ -9,7 +9,8 @@
       "Bash(rm:*)",
       "Bash(ls:*)",
       "Bash(git branch:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(gh repo edit:*)"
     ],
     "deny": []
   }
