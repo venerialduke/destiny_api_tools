@@ -7,7 +7,9 @@
       "Bash(mkdir:*)",
       "Bash(python:*)",
       "Bash(rm:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
