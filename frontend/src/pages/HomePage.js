@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { 
   Package, 
   Settings, 
@@ -9,8 +8,7 @@ import {
   Shield,
   Zap,
   Star,
-  LogIn,
-  User
+  LogIn
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -230,12 +228,9 @@ const HomePage = () => {
                   </div>
                   
                   {isAuthenticated ? (
-                    <Link
-                      to={tool.path}
-                      className="block w-full bg-gray-900 text-white text-center py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors duration-200 font-medium"
-                    >
-                      Launch Tool
-                    </Link>
+                    <div className="block w-full bg-gray-400 text-white text-center py-3 px-4 rounded-lg cursor-not-allowed font-medium">
+                      Coming Soon
+                    </div>
                   ) : (
                     <button
                       onClick={login}

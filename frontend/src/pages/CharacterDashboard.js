@@ -10,14 +10,8 @@ const CharacterDashboard = () => {
   const { isAuthenticated, characters: authCharacters, user, primaryMembership } = useAuth();
   const [characters, setCharacters] = useState(authCharacters || []);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
-
-  // Redirect if not authenticated
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
 
   useEffect(() => {
     // Initialize with auth context characters
@@ -27,6 +21,11 @@ const CharacterDashboard = () => {
       setSelectedCharacter(authCharacters[0]);
     }
   }, [authCharacters]);
+
+  // Redirect if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
   const refreshCharacterData = async () => {
     if (!primaryMembership) {
@@ -58,16 +57,6 @@ const CharacterDashboard = () => {
     setSelectedCharacter(character);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader className="w-12 h-12 text-blue-600 mx-auto animate-spin mb-4" />
-          <p className="text-lg text-gray-600">Loading character data...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">

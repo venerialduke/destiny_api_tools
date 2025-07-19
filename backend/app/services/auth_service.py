@@ -27,7 +27,7 @@ class AuthService:
             'response_type': 'code',
             'state': state,
             'redirect_uri': Config.OAUTH_REDIRECT_URI,
-            'scope': 'ReadBasicUserProfile ReadDestinyInventoryAndVault'
+            'scope': 'ReadBasicUserProfile'
         }
         
         return f"{self.auth_url}?{urlencode(params)}"
