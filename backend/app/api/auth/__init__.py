@@ -43,7 +43,7 @@ def oauth_callback():
             'access_token': tokens['access_token'],
             'refresh_token': tokens['refresh_token'],
             'expires_in': tokens['expires_in'],
-            'membership_id': tokens['membership_id']
+            'user_data': tokens['user_data']
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500

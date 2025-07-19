@@ -18,7 +18,7 @@ class AuthService:
         self.token_url = 'https://www.bungie.net/Platform/App/OAuth/token/'
         
     def get_authorization_url(self, state: str = None) -> str:
-        """Generate the OAuth authorization URL."""
+        """Generate the OAuth authorization URL with required scopes."""
         if not state:
             state = secrets.token_urlsafe(32)
             
@@ -26,13 +26,14 @@ class AuthService:
             'client_id': Config.BUNGIE_CLIENT_ID,
             'response_type': 'code',
             'state': state,
-            'redirect_uri': Config.OAUTH_REDIRECT_URI
+            'redirect_uri': Config.OAUTH_REDIRECT_URI,
+            'scope': 'ReadBasicUserProfile ReadDestinyInventoryAndVault'
         }
         
         return f"{self.auth_url}?{urlencode(params)}"
     
     def exchange_code_for_tokens(self, code: str) -> Dict[str, Any]:
-        """Exchange authorization code for access tokens."""
+        """Exchange authorization code for access tokens and retrieve user data."""
         data = {
             'grant_type': 'authorization_code',
             'code': code,
@@ -51,14 +52,14 @@ class AuthService:
         
         token_data = response.json()
         
-        # Get membership ID from the token
-        membership_id = self._get_membership_id(token_data['access_token'])
+        # Get user memberships and character data
+        user_data = self._get_user_data_with_characters(token_data['access_token'])
         
         return {
             'access_token': token_data['access_token'],
             'refresh_token': token_data['refresh_token'],
             'expires_in': token_data['expires_in'],
-            'membership_id': membership_id
+            'user_data': user_data
         }
     
     def refresh_access_token(self, refresh_token: str) -> Dict[str, Any]:
@@ -86,22 +87,85 @@ class AuthService:
             'expires_in': token_data['expires_in']
         }
     
-    def _get_membership_id(self, access_token: str) -> str:
-        """Get the membership ID from the access token."""
+    def _get_user_data_with_characters(self, access_token: str) -> Dict[str, Any]:
+        """Get user memberships and character data."""
         headers = Config.get_oauth_headers(access_token)
         
+        # Get user memberships
         response = requests.get(
             f"{Config.BUNGIE_API_BASE_URL}/User/GetMembershipsForCurrentUser/",
             headers=headers
         )
         response.raise_for_status()
         
-        data = response.json()
+        memberships_data = response.json()
+        user_membership_data = memberships_data['Response']
         
-        # Get the primary membership ID
-        if data['Response']['destinyMemberships']:
-            return data['Response']['destinyMemberships'][0]['membershipId']
-        elif data['Response']['bungieNetUser']:
-            return data['Response']['bungieNetUser']['membershipId']
-        else:
-            raise ValueError("Could not determine membership ID")
+        # Get primary Destiny membership
+        primary_membership = None
+        if user_membership_data['primaryMembershipId']:
+            # Find the membership with the primary ID
+            for membership in user_membership_data['destinyMemberships']:
+                if membership['membershipId'] == user_membership_data['primaryMembershipId']:
+                    primary_membership = membership
+                    break
+        
+        # If no primary found, use the first available
+        if not primary_membership and user_membership_data['destinyMemberships']:
+            primary_membership = user_membership_data['destinyMemberships'][0]
+        
+        if not primary_membership:
+            raise ValueError("No Destiny memberships found for user")
+        
+        # Get character data for the primary membership
+        characters = self._get_characters(
+            access_token, 
+            primary_membership['membershipType'], 
+            primary_membership['membershipId']
+        )
+        
+        return {
+            'bungie_net_user': user_membership_data['bungieNetUser'],
+            'destiny_memberships': user_membership_data['destinyMemberships'],
+            'primary_membership_id': user_membership_data['primaryMembershipId'],
+            'primary_membership': primary_membership,
+            'characters': characters
+        }
+    
+    def _get_characters(self, access_token: str, membership_type: int, membership_id: str) -> list:
+        """Get character data for a specific membership."""
+        headers = Config.get_oauth_headers(access_token)
+        
+        response = requests.get(
+            f"{Config.BUNGIE_API_BASE_URL}/Destiny2/{membership_type}/Profile/{membership_id}/?components=200",
+            headers=headers
+        )
+        response.raise_for_status()
+        
+        profile_data = response.json()
+        
+        if 'characters' not in profile_data['Response'] or 'data' not in profile_data['Response']['characters']:
+            return []
+        
+        characters_data = profile_data['Response']['characters']['data']
+        
+        # Format character data for frontend
+        characters = []
+        for character_id, character_data in characters_data.items():
+            characters.append({
+                'character_id': character_id,
+                'membership_id': character_data['membershipId'],
+                'membership_type': character_data['membershipType'],
+                'character_class': character_data['classType'],
+                'race': character_data['raceType'],
+                'gender': character_data['genderType'],
+                'light_level': character_data['light'],
+                'level': character_data['levelProgression']['level'],
+                'emblem_path': character_data['emblemPath'],
+                'emblem_background_path': character_data['emblemBackgroundPath'],
+                'emblem_hash': character_data['emblemHash'],
+                'base_character_level': character_data['baseCharacterLevel'],
+                'percent_to_next_level': character_data['percentToNextLevel']
+            })
+        
+        return characters

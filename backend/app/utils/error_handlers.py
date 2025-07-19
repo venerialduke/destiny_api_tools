@@ -8,6 +8,29 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def handle_api_error(error, default_message="An error occurred"):
+    """Handle API errors and return appropriate JSON response."""
+    logger.error(f"API error: {error}")
+    
+    if hasattr(error, 'response') and hasattr(error.response, 'status_code'):
+        # Handle HTTP errors from requests
+        status_code = error.response.status_code
+        try:
+            error_data = error.response.json()
+            message = error_data.get('Message', str(error))
+        except:
+            message = str(error)
+    else:
+        # Handle other exceptions
+        status_code = 500
+        message = str(error) or default_message
+    
+    return jsonify({
+        'success': False,
+        'error': message
+    }), status_code
+
+
 def register_error_handlers(app):
     """Register error handlers for the Flask app."""
     
