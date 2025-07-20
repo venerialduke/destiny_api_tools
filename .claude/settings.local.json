@@ -10,7 +10,12 @@
       "Bash(ls:*)",
       "Bash(git branch:*)",
       "Bash(git add:*)",
-      "Bash(gh repo edit:*)"
+      "Bash(gh repo edit:*)",
+      "Bash(mkcert:*)",
+      "Bash(mv:*)",
+      "Bash(touch:*)",
+      "Bash(curl:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }

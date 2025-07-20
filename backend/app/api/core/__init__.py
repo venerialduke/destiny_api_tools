@@ -4,8 +4,12 @@ Core API endpoints for basic functionality.
 
 from flask import Blueprint, jsonify
 from ...services.bungie_api import BungieAPIService
+from .user import user_bp
 
 core_bp = Blueprint('core', __name__)
+
+# Register user endpoints
+core_bp.register_blueprint(user_bp, url_prefix='/user')
 
 
 @core_bp.route('/health', methods=['GET'])
