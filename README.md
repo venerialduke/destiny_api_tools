@@ -1,96 +1,133 @@
 # Destiny API Tools
 
-A comprehensive web application for Destiny 2 players to manage inventory, track statistics, find fireteams, and more using the Bungie.net API.
+A comprehensive, enterprise-grade web application for Destiny 2 players and developers. Features advanced character management, real-time data synchronization, intelligent search capabilities, and a robust toolkit for interacting with Bungie's Destiny 2 API.
 
-## Features
+## 🚀 Features
 
-### 🎒 Inventory Manager
-- Transfer items between characters and vault
-- View all characters' inventory in one place
-- Quick equip and unequip items
-- Vault management tools
+### 🔐 Authentication & User Management
+- **OAuth Integration**: Secure Bungie.net authentication flow
+- **Character Sync**: Automatic character data synchronization
+- **Session Management**: Persistent authentication with token refresh
+- **Multi-Platform Support**: Xbox, PlayStation, Steam, and Stadia
 
-### ⚙️ Loadout Manager
-- Create and save custom loadouts
-- Quick loadout switching
-- Build optimization tools
-- Loadout sharing capabilities
+### 🔍 Advanced Search & Discovery
+- **Full-Text Search**: Search across all Destiny content (weapons, armor, activities)
+- **Smart Filtering**: Advanced filters with faceted search
+- **Auto-Suggestions**: Real-time search suggestions and completions
+- **Fuzzy Matching**: Typo-tolerant search with intelligent ranking
 
-### 📊 Stats Tracker
-- Comprehensive player statistics
-- Activity history and performance metrics
-- Leaderboard comparisons
-- Progress tracking
+### ⚡ Real-Time Features
+- **WebSocket Sync**: Live character and inventory updates
+- **Background Processing**: Scheduled manifest updates and data sync
+- **Performance Monitoring**: Real-time application health tracking
+- **Push Notifications**: Activity and vendor alerts
 
-### 👥 Fireteam Finder
-- Looking for Group (LFG) system
-- Activity-based matchmaking
-- Team coordination tools
-- Clan integration
+### 🛠️ Developer Tools
+- **Comprehensive API**: RESTful endpoints for all functionality
+- **Health Monitoring**: Production-ready health checks and metrics
+- **Structured Logging**: JSON-formatted logs with request tracing
+- **Performance Analytics**: Client and server-side performance tracking
 
-### 🛒 Vendor Tracker
-- Real-time vendor inventory monitoring
-- Weapon and armor roll notifications
-- Vendor rotation tracking
-- Wishlist integration
+### 📊 Data Management
+- **Manifest Processing**: Automated Destiny 2 manifest updates
+- **Smart Caching**: Multi-tier caching with intelligent invalidation
+- **Data Pipeline**: Background job processing for heavy operations
+- **Search Indexing**: Full-text search with faceting and aggregations
 
-## Tech Stack
+## 🏗️ Architecture & Tech Stack
 
-### Backend
-- **Flask** - Python web framework
-- **Flask-CORS** - Cross-origin resource sharing
-- **Requests** - HTTP library for Bungie API calls
-- **Gunicorn** - WSGI HTTP server
+### Backend (Python/Flask)
+- **Flask**: Modern Python web framework with blueprint organization
+- **WebSocket Support**: Real-time bidirectional communication
+- **Background Jobs**: Scheduled task processing with persistence
+- **Caching Layer**: Multi-tier caching (Memory → Redis → Database)
+- **Search Engine**: Full-text search with indexing and faceting
+- **Health Monitoring**: Production-ready health checks and metrics
+- **Structured Logging**: JSON logging with request tracing
 
-### Frontend
-- **React** - JavaScript library for building UIs
-- **React Router** - Client-side routing
-- **React Query** - Data fetching and caching
-- **Tailwind CSS** - Utility-first CSS framework
-- **Lucide React** - Icon library
+### Frontend (React/TypeScript)
+- **React 18+**: Modern React with hooks and concurrent features
+- **Tailwind CSS**: Utility-first styling with component design system
+- **Advanced Components**: Search, filtering, real-time updates
+- **Performance Monitoring**: Client-side metrics and error tracking
+- **Service Architecture**: Layered API integration with error handling
+- **Responsive Design**: Mobile-first responsive layouts
 
-### API Integration
-- **Bungie.net API** - Official Destiny 2 API
-- **OAuth 2.0** - Authentication flow
-- **Real-time updates** - Live data synchronization
+### Infrastructure & DevOps
+- **Docker Ready**: Container-based deployment
+- **Health Endpoints**: Kubernetes-compatible health checks
+- **Monitoring**: Prometheus metrics export
+- **Testing**: Comprehensive test coverage (backend + frontend)
+- **Documentation**: Complete API documentation and guides
 
-## Project Structure
+### Security & Performance
+- **OAuth 2.0**: Secure Bungie.net authentication
+- **Token Management**: Automatic refresh and secure storage
+- **Rate Limiting**: API protection and usage optimization
+- **Error Handling**: Centralized error processing and logging
+- **Performance Optimization**: Caching, connection pooling, request batching
+
+## 📁 Project Structure
 
 ```
 destiny_api_tools/
-├── backend/                 # Flask backend application
+├── backend/                           # Flask backend application
 │   ├── app/
-│   │   ├── api/            # API endpoints
-│   │   │   ├── auth/       # Authentication routes
-│   │   │   ├── core/       # Core API routes
-│   │   │   └── tools/      # Tool-specific routes
-│   │   ├── models/         # Data models
-│   │   ├── services/       # Business logic services
-│   │   ├── utils/          # Utility functions
-│   │   └── config.py       # Configuration settings
-│   ├── tests/              # Backend tests
-│   ├── requirements.txt    # Python dependencies
-│   └── app.py             # Application entry point
-├── frontend/               # React frontend application
+│   │   ├── api/                      # API endpoints (Blueprint-based)
+│   │   │   ├── auth/                 # Authentication & OAuth
+│   │   │   └── core/                 # Core functionality
+│   │   │       ├── health.py         # Health checks & monitoring
+│   │   │       ├── search.py         # Advanced search endpoints
+│   │   │       ├── user.py           # User management
+│   │   │       └── performance.py    # Performance metrics
+│   │   ├── services/                 # Business logic layer
+│   │   │   ├── bungie_api.py         # Bungie API integration
+│   │   │   ├── auth_service.py       # OAuth & authentication
+│   │   │   ├── search_service.py     # Advanced search engine
+│   │   │   ├── websocket_manager.py  # Real-time updates
+│   │   │   ├── data_pipeline.py      # Background processing
+│   │   │   ├── job_scheduler.py      # Scheduled tasks
+│   │   │   ├── cache_service.py      # Multi-tier caching
+│   │   │   └── health_monitor.py     # Application monitoring
+│   │   ├── utils/                    # Utility modules
+│   │   │   ├── response.py           # Standardized API responses
+│   │   │   ├── validation.py         # Request validation
+│   │   │   └── logging_config.py     # Structured logging
+│   │   └── config.py                 # Configuration management
+│   └── tests/                        # Comprehensive test suite
+├── frontend/                         # React frontend application
 │   ├── src/
-│   │   ├── components/     # React components
-│   │   │   ├── layout/     # Layout components
-│   │   │   ├── shared/     # Shared components
-│   │   │   └── tools/      # Tool-specific components
-│   │   ├── contexts/       # React contexts
-│   │   ├── hooks/          # Custom hooks
-│   │   ├── pages/          # Page components
-│   │   ├── services/       # API services
-│   │   └── utils/          # Utility functions
-│   ├── public/             # Static assets
-│   └── package.json        # Node.js dependencies
-├── references/             # API documentation
-│   ├── api-summary/        # API usage guides
-│   ├── endpoint-details/   # Endpoint documentation
-│   └── entity-details/     # Entity schemas
-├── tests/                  # Integration tests
-└── docs/                   # Project documentation
+│   │   ├── components/               # React components
+│   │   │   ├── shared/               # Reusable UI components
+│   │   │   │   ├── AdvancedSearch.js # Advanced search interface
+│   │   │   │   ├── CharacterCard.js  # Character display
+│   │   │   │   └── CharacterList.js  # Character management
+│   │   │   └── layout/               # Layout components
+│   │   ├── services/                 # API integration layer
+│   │   │   ├── base/BaseService.js   # Common service patterns
+│   │   │   ├── apiClient.js          # HTTP client with interceptors
+│   │   │   ├── authService.js        # Authentication service
+│   │   │   └── userService.js        # User data management
+│   │   ├── utils/                    # Utility functions
+│   │   │   └── performanceMonitor.js # Client-side monitoring
+│   │   ├── contexts/                 # React state management
+│   │   └── pages/                    # Page components
+│   └── package.json                  # Dependencies & scripts
+├── references/                       # Bungie API documentation
+│   ├── api-summary/                  # Usage guides & workflows
+│   ├── endpoint-details/             # Complete endpoint docs
+│   └── entity-details/               # Data structure schemas
+├── PROJECT_ARCHITECTURE.md          # Detailed architecture guide
+├── DEVELOPER_QUICK_START.md         # Quick development guide
+└── CLAUDE.md                         # Development instructions
 ```
+
+## 📖 Documentation
+
+- **[Project Architecture](PROJECT_ARCHITECTURE.md)**: Detailed system design and component overview
+- **[Developer Quick Start](DEVELOPER_QUICK_START.md)**: Get up and running in 5 minutes
+- **[API Reference](references/)**: Complete Bungie API documentation
+- **[Development Guide](CLAUDE.md)**: Project-specific development instructions
 
 ## Getting Started
 

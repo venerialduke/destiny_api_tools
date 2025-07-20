@@ -5,21 +5,19 @@ Core API endpoints for basic functionality.
 from flask import Blueprint, jsonify
 from ...services.bungie_api import BungieAPIService
 from .user import user_bp
+from .performance import performance_bp
+from .search import search_bp
+from .health import health_bp
 
 core_bp = Blueprint('core', __name__)
 
-# Register user endpoints
+# Register sub-blueprints
 core_bp.register_blueprint(user_bp, url_prefix='/user')
+core_bp.register_blueprint(performance_bp, url_prefix='/performance')
+core_bp.register_blueprint(search_bp, url_prefix='/search')
+core_bp.register_blueprint(health_bp, url_prefix='/health')
 
 
-@core_bp.route('/health', methods=['GET'])
-def health_check():
-    """Health check endpoint."""
-    return jsonify({
-        'status': 'healthy',
-        'service': 'destiny-api-tools-backend',
-        'version': '1.0.0'
-    })
 
 
 @core_bp.route('/manifest', methods=['GET'])

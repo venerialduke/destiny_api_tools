@@ -23,7 +23,8 @@
       "Bash(fi)",
       "Bash(venv/Scripts/activate.bat:*)",
       "Bash(npm run build:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(timeout:*)"
     ],
     "deny": []
   }

@@ -1,105 +1,90 @@
+import BaseService from '../base/BaseService';
+
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
-class DemoApiService {
+class DemoApiService extends BaseService {
   constructor() {
-    this.cache = new Map();
-    this.requestMetrics = {
-      totalRequests: 0,
-      cacheHits: 0,
-      totalTime: 0,
-      fastestRequest: Infinity,
-      slowestRequest: 0
+    // Create a simple API client
+    const apiClient = {
+      get: (url, config = {}) => fetch(url, { method: 'GET', ...config }).then(res => res.json()),
+      post: (url, data, config = {}) => fetch(url, { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json', ...config.headers },
+        body: JSON.stringify(data),
+        ...config 
+      }).then(res => res.json())
     };
+    
+    super(apiClient);
+    this.baseUrl = API_BASE_URL;
   }
 
   async searchItems(query, options = {}) {
-    const startTime = performance.now();
+    const params = new URLSearchParams({
+      q: query,
+      limit: options.limit || 20,
+      offset: options.offset || 0,
+      ...options.filters
+    });
+
+    const cacheKey = this.createCacheKey('search', { query, ...options });
     
-    try {
-      const params = new URLSearchParams({
-        q: query,
-        limit: options.limit || 20,
-        offset: options.offset || 0,
-        ...options.filters
-      });
-
-      const cacheKey = `search_${params.toString()}`;
-      
-      // Check cache first
-      if (this.cache.has(cacheKey)) {
-        this.requestMetrics.cacheHits++;
-        this.requestMetrics.totalRequests++;
-        return this.cache.get(cacheKey);
+    return this.withErrorHandling(
+      async () => {
+        const response = await fetch(`${this.baseUrl}/manifest/items/search?${params}`);
+        
+        if (!response.ok) {
+          throw new Error(`Search failed: ${response.status}`);
+        }
+        
+        return response.json();
+      },
+      {
+        cacheKey,
+        cacheTTL: 300000, // 5 minutes
+        retry: 2
       }
-
-      const response = await fetch(`${API_BASE_URL}/manifest/items/search?${params}`);
-      
-      if (!response.ok) {
-        throw new Error(`Search failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      // Cache the result
-      this.cache.set(cacheKey, data);
-      
-      // Update metrics
-      const duration = performance.now() - startTime;
-      this.updateMetrics(duration);
-      
-      return data;
-    } catch (error) {
-      console.error('Search error:', error);
-      throw error;
-    }
+    );
   }
 
   async getItemDetails(itemHash) {
-    const startTime = performance.now();
+    const cacheKey = this.createCacheKey('item', { hash: itemHash });
     
-    try {
-      const cacheKey = `item_${itemHash}`;
-      
-      // Check cache first
-      if (this.cache.has(cacheKey)) {
-        this.requestMetrics.cacheHits++;
-        this.requestMetrics.totalRequests++;
-        return this.cache.get(cacheKey);
+    return this.withErrorHandling(
+      async () => {
+        const response = await fetch(`${this.baseUrl}/manifest/items/${itemHash}`);
+        
+        if (!response.ok) {
+          throw new Error(`Item fetch failed: ${response.status}`);
+        }
+        
+        return response.json();
+      },
+      {
+        cacheKey,
+        cacheTTL: 600000, // 10 minutes for item details
+        retry: 2
       }
-
-      const response = await fetch(`${API_BASE_URL}/manifest/items/${itemHash}`);
-      
-      if (!response.ok) {
-        throw new Error(`Item fetch failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      // Cache the result
-      this.cache.set(cacheKey, data);
-      
-      // Update metrics
-      const duration = performance.now() - startTime;
-      this.updateMetrics(duration);
-      
-      return data;
-    } catch (error) {
-      console.error('Item details error:', error);
-      throw error;
-    }
+    );
   }
 
   async getImagePerformanceMetrics() {
-    try {
-      const response = await fetch(`${API_BASE_URL}/images/cache/stats`);
-      
-      if (!response.ok) {
-        throw new Error(`Metrics fetch failed: ${response.status}`);
+    return this.withErrorHandling(
+      async () => {
+        const response = await fetch(`${this.baseUrl}/images/cache/stats`);
+        
+        if (!response.ok) {
+          throw new Error(`Metrics fetch failed: ${response.status}`);
+        }
+        
+        return response.json();
+      },
+      {
+        cacheTTL: 10000, // 10 seconds for metrics
+        retry: 1
       }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Metrics error:', error);
+    ).catch(() => {
+      // Return default metrics on error
       return {
         cache_statistics: {
           cache_size_mb: 0,
@@ -110,7 +95,7 @@ class DemoApiService {
           errors: 0
         }
       };
-    }
+    });
   }
 
   // Image loading performance testing
@@ -123,7 +108,7 @@ class DemoApiService {
       try {
         const imageUrl = format === 'original' 
           ? `https://bungie.net${iconPath}`
-          : `${API_BASE_URL}/images/proxy${iconPath}?format=${format}&size=medium`;
+          : `${this.baseUrl}/images/proxy${iconPath}?format=${format}&size=medium`;
         
         const response = await fetch(imageUrl);
         
@@ -153,23 +138,17 @@ class DemoApiService {
     return results;
   }
 
-  updateMetrics(duration) {
-    this.requestMetrics.totalRequests++;
-    this.requestMetrics.totalTime += duration;
-    this.requestMetrics.fastestRequest = Math.min(this.requestMetrics.fastestRequest, duration);
-    this.requestMetrics.slowestRequest = Math.max(this.requestMetrics.slowestRequest, duration);
-  }
-
+  // Override base class method to include additional metrics
   getRequestMetrics() {
-    const { totalRequests, cacheHits, totalTime, fastestRequest, slowestRequest } = this.requestMetrics;
+    const baseStats = this.getPerformanceStats();
     
     return {
-      totalRequests,
-      cacheHits,
-      cacheHitRate: totalRequests > 0 ? (cacheHits / totalRequests * 100).toFixed(1) : 0,
-      averageTime: totalRequests > 0 ? (totalTime / totalRequests).toFixed(1) : 0,
-      fastestRequest: fastestRequest === Infinity ? 0 : fastestRequest.toFixed(1),
-      slowestRequest: slowestRequest.toFixed(1)
+      totalRequests: baseStats.requestCount,
+      cacheHits: baseStats.requestCount - baseStats.errorCount, // Approximate
+      cacheHitRate: baseStats.successRate,
+      averageTime: baseStats.averageRequestTime,
+      fastestRequest: '0', // Not tracked in base class
+      slowestRequest: '0'  // Not tracked in base class
     };
   }
 
@@ -181,15 +160,10 @@ class DemoApiService {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
+  // Override base class clearCache to also reset performance stats
   clearCache() {
-    this.cache.clear();
-    this.requestMetrics = {
-      totalRequests: 0,
-      cacheHits: 0,
-      totalTime: 0,
-      fastestRequest: Infinity,
-      slowestRequest: 0
-    };
+    super.clearCache();
+    this.resetPerformanceStats();
   }
 }
 

@@ -2,46 +2,20 @@
 Core Bungie API service for making authenticated requests.
 """
 
-import requests
 from typing import Dict, Any, Optional
-from ..config import Config
+from .base_api_client import BaseBungieAPIClient
 
 
-class BungieAPIService:
-    """Service for interacting with the Bungie API."""
+class BungieAPIService(BaseBungieAPIClient):
+    """Service for interacting with the Bungie API using the base client."""
     
     def __init__(self, access_token: Optional[str] = None):
         """Initialize the Bungie API service."""
-        self.base_url = Config.BUNGIE_API_BASE_URL
-        self.access_token = access_token
-        self.session = requests.Session()
-        
-    def _get_headers(self, authenticated: bool = False) -> Dict[str, str]:
-        """Get headers for API requests."""
-        if authenticated and self.access_token:
-            return Config.get_oauth_headers(self.access_token)
-        return Config.get_bungie_headers()
-    
-    def _make_request(self, method: str, endpoint: str, authenticated: bool = False, 
-                     params: Optional[Dict] = None, data: Optional[Dict] = None) -> Dict[str, Any]:
-        """Make a request to the Bungie API."""
-        url = f"{self.base_url}{endpoint}"
-        headers = self._get_headers(authenticated)
-        
-        response = self.session.request(
-            method=method,
-            url=url,
-            headers=headers,
-            params=params,
-            json=data
-        )
-        
-        response.raise_for_status()
-        return response.json()
+        super().__init__(access_token)
     
     def get_manifest(self) -> Dict[str, Any]:
         """Get the current Destiny 2 manifest."""
-        return self._make_request('GET', '/Destiny2/Manifest/')
+        return self.get('/Destiny2/Manifest/')
     
     def get_profile(self, membership_type: int, membership_id: str, 
                    components: Optional[str] = None) -> Dict[str, Any]:
@@ -50,10 +24,8 @@ class BungieAPIService:
         if components:
             params['components'] = components
             
-        return self._make_request(
-            'GET', 
+        return self.get(
             f'/Destiny2/{membership_type}/Profile/{membership_id}/',
-            authenticated=True,
             params=params
         )
     
@@ -64,10 +36,8 @@ class BungieAPIService:
         if components:
             params['components'] = components
             
-        return self._make_request(
-            'GET',
+        return self.get(
             f'/Destiny2/{membership_type}/Profile/{membership_id}/Character/{character_id}/',
-            authenticated=True,
             params=params
         )
     
@@ -84,12 +54,7 @@ class BungieAPIService:
             'membershipType': membership_type
         }
         
-        return self._make_request(
-            'POST',
-            '/Destiny2/Actions/Items/TransferItem/',
-            authenticated=True,
-            data=data
-        )
+        return self.post('/Destiny2/Actions/Items/TransferItem/', json=data)
     
     def equip_item(self, item_id: str, character_id: str, 
                   membership_type: int) -> Dict[str, Any]:
@@ -100,9 +65,4 @@ class BungieAPIService:
             'membershipType': membership_type
         }
         
-        return self._make_request(
-            'POST',
-            '/Destiny2/Actions/Items/EquipItem/',
-            authenticated=True,
-            data=data
-        )
+        return self.post('/Destiny2/Actions/Items/EquipItem/', json=data)
