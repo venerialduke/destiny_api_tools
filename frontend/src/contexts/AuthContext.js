@@ -17,6 +17,8 @@ const AUTH_ACTIONS = {
 // Initial state
 const initialState = {
   user: null,
+  characters: [],
+  primaryMembership: null,
   isAuthenticated: false,
   isLoading: true,
   error: null,
@@ -38,6 +40,8 @@ function authReducer(state, action) {
       return {
         ...state,
         user: action.payload.user,
+        characters: action.payload.characters || [],
+        primaryMembership: action.payload.primaryMembership,
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -49,6 +53,8 @@ function authReducer(state, action) {
       return {
         ...state,
         user: null,
+        characters: [],
+        primaryMembership: null,
         isAuthenticated: false,
         isLoading: false,
         error: action.payload.error,
@@ -89,13 +95,16 @@ export const AuthProvider = ({ children }) => {
       try {
         const token = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
+        const userData = localStorage.getItem('userData');
         
-        if (token && refreshToken) {
-          // TODO: Validate token with backend
+        if (token && refreshToken && userData) {
+          const parsedUserData = JSON.parse(userData);
           dispatch({
             type: AUTH_ACTIONS.LOGIN_SUCCESS,
             payload: {
-              user: { membershipId: localStorage.getItem('membershipId') },
+              user: parsedUserData.bungie_net_user,
+              characters: parsedUserData.characters,
+              primaryMembership: parsedUserData.primary_membership,
               accessToken: token,
               refreshToken: refreshToken
             }
@@ -122,7 +131,6 @@ export const AuthProvider = ({ children }) => {
         type: AUTH_ACTIONS.LOGIN_FAILURE,
         payload: { error: error.message }
       });
-      toast.error('Login failed');
     }
   };
 
@@ -131,15 +139,17 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: AUTH_ACTIONS.LOGIN_START });
       const tokens = await authService.exchangeCodeForTokens(code);
       
-      // Store tokens
+      // Store tokens and user data
       localStorage.setItem('accessToken', tokens.accessToken);
       localStorage.setItem('refreshToken', tokens.refreshToken);
-      localStorage.setItem('membershipId', tokens.membershipId);
+      localStorage.setItem('userData', JSON.stringify(tokens.userData));
       
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
         payload: {
-          user: { membershipId: tokens.membershipId },
+          user: tokens.userData.bungie_net_user,
+          characters: tokens.userData.characters,
+          primaryMembership: tokens.userData.primary_membership,
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken
         }
@@ -152,7 +162,6 @@ export const AuthProvider = ({ children }) => {
         type: AUTH_ACTIONS.LOGIN_FAILURE,
         payload: { error: error.message }
       });
-      toast.error('Login failed');
       return false;
     }
   };
@@ -161,13 +170,12 @@ export const AuthProvider = ({ children }) => {
     try {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
-      localStorage.removeItem('membershipId');
+      localStorage.removeItem('userData');
       
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
       toast.success('Successfully logged out');
     } catch (error) {
       console.error('Logout error:', error);
-      toast.error('Logout failed');
     }
   };
 

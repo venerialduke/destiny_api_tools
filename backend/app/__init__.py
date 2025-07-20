@@ -17,8 +17,8 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
     
-    # Initialize extensions
-    CORS(app)
+    # Initialize extensions with explicit CORS configuration
+    CORS(app, origins=["https://localhost:3000", "http://localhost:3000"], supports_credentials=True)
     
     # Register blueprints
     app.register_blueprint(api_bp, url_prefix='/api')

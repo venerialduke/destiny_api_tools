@@ -15,13 +15,7 @@ import ProtectedRoute from './components/shared/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import CallbackPage from './pages/auth/CallbackPage';
-
-// Tool pages
-import InventoryManagerPage from './pages/tools/InventoryManagerPage';
-import LoadoutManagerPage from './pages/tools/LoadoutManagerPage';
-import StatsTrackerPage from './pages/tools/StatsTrackerPage';
-import FireteamFinderPage from './pages/tools/FireteamFinderPage';
-import VendorTrackerPage from './pages/tools/VendorTrackerPage';
+import CharacterDashboard from './pages/CharacterDashboard';
 
 // Styles
 import './App.css';
@@ -51,44 +45,12 @@ function App() {
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/auth/callback" element={<CallbackPage />} />
                   
-                  {/* Protected tool routes */}
+                  {/* Protected routes */}
                   <Route 
-                    path="/tools/inventory" 
+                    path="/characters" 
                     element={
                       <ProtectedRoute>
-                        <InventoryManagerPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/tools/loadouts" 
-                    element={
-                      <ProtectedRoute>
-                        <LoadoutManagerPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/tools/stats" 
-                    element={
-                      <ProtectedRoute>
-                        <StatsTrackerPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/tools/fireteam" 
-                    element={
-                      <ProtectedRoute>
-                        <FireteamFinderPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/tools/vendors" 
-                    element={
-                      <ProtectedRoute>
-                        <VendorTrackerPage />
+                        <CharacterDashboard />
                       </ProtectedRoute>
                     } 
                   />
