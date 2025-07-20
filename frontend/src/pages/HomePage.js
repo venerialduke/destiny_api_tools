@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Package, 
   Settings, 
@@ -8,7 +9,8 @@ import {
   Shield,
   Zap,
   Star,
-  LogIn
+  LogIn,
+  Image
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -75,10 +77,21 @@ const HomePage = () => {
               Comprehensive tools for Destiny 2 players to manage inventory, 
               track stats, and enhance your Guardian experience
             </p>
-            <div className="flex justify-center items-center space-x-4">
+            <div className="flex justify-center items-center space-x-6">
               <Shield className="w-8 h-8" />
               <Zap className="w-8 h-8" />
               <Star className="w-8 h-8" />
+            </div>
+            
+            {/* Demo Link */}
+            <div className="mt-8">
+              <Link
+                to="/demo"
+                className="inline-flex items-center px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium"
+              >
+                <Image className="w-5 h-5 mr-2" />
+                View Image Optimization Demo
+              </Link>
             </div>
           </div>
         </div>

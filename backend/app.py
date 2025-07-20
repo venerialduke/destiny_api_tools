@@ -10,10 +10,5 @@ from app.config import Config
 app = create_app(Config)
 
 if __name__ == '__main__':
-    # HTTPS configuration for local development
-    ssl_context = None
-    if os.path.exists('certs/localhost+2.pem') and os.path.exists('certs/localhost+2-key.pem'):
-        ssl_context = ('certs/localhost+2.pem', 'certs/localhost+2-key.pem')
-    
-    port = 5000 if ssl_context is None else 5001
-    app.run(debug=True, host='0.0.0.0', port=port, ssl_context=ssl_context)
+    # Run on HTTP for demo purposes (avoid certificate issues)
+    app.run(debug=True, host='0.0.0.0', port=5001)
