@@ -14,9 +14,10 @@ def login():
     """Initiate OAuth login flow."""
     try:
         auth_service = AuthService()
-        auth_url = auth_service.get_authorization_url()
+        auth_data = auth_service.get_authorization_url()
         return jsonify({
-            'auth_url': auth_url,
+            'auth_url': auth_data['auth_url'],
+            'state': auth_data['state'],
             'status': 'redirect_required'
         })
     except Exception as e:

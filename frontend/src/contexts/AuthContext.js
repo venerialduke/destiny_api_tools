@@ -131,7 +131,6 @@ export const AuthProvider = ({ children }) => {
         type: AUTH_ACTIONS.LOGIN_FAILURE,
         payload: { error: error.message }
       });
-      toast.error('Login failed');
     }
   };
 
@@ -163,7 +162,6 @@ export const AuthProvider = ({ children }) => {
         type: AUTH_ACTIONS.LOGIN_FAILURE,
         payload: { error: error.message }
       });
-      toast.error('Login failed');
       return false;
     }
   };
@@ -178,7 +176,6 @@ export const AuthProvider = ({ children }) => {
       toast.success('Successfully logged out');
     } catch (error) {
       console.error('Logout error:', error);
-      toast.error('Logout failed');
     }
   };
 

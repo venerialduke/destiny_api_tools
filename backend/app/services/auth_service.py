@@ -17,7 +17,7 @@ class AuthService:
         self.auth_url = 'https://www.bungie.net/en/OAuth/Authorize'
         self.token_url = 'https://www.bungie.net/Platform/App/OAuth/token/'
         
-    def get_authorization_url(self, state: str = None) -> str:
+    def get_authorization_url(self, state: str = None) -> Dict[str, str]:
         """Generate the OAuth authorization URL with required scopes."""
         if not state:
             state = secrets.token_urlsafe(32)
@@ -26,11 +26,15 @@ class AuthService:
             'client_id': Config.BUNGIE_CLIENT_ID,
             'response_type': 'code',
             'state': state,
-            'redirect_uri': Config.OAUTH_REDIRECT_URI,
-            'scope': 'ReadBasicUserProfile'
+            'redirect_uri': Config.OAUTH_REDIRECT_URI
         }
         
-        return f"{self.auth_url}?{urlencode(params)}"
+        auth_url = f"{self.auth_url}?{urlencode(params)}"
+        print(f"DEBUG: Generated OAuth URL: {auth_url}")
+        return {
+            'auth_url': auth_url,
+            'state': state
+        }
     
     def exchange_code_for_tokens(self, code: str) -> Dict[str, Any]:
         """Exchange authorization code for access tokens and retrieve user data."""
@@ -47,8 +51,16 @@ class AuthService:
             'X-API-Key': Config.BUNGIE_API_KEY
         }
         
+        print(f"DEBUG: Token exchange request data: {data}")
+        print(f"DEBUG: Token exchange headers: {headers}")
+        
         response = requests.post(self.token_url, data=data, headers=headers)
-        response.raise_for_status()
+        print(f"DEBUG: Token response status: {response.status_code}")
+        print(f"DEBUG: Token response content: {response.text}")
+        
+        if not response.ok:
+            print(f"DEBUG: Token exchange failed with status {response.status_code}: {response.text}")
+            raise Exception(f"Token exchange failed: {response.text}")
         
         token_data = response.json()
         

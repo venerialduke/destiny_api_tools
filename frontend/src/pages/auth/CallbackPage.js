@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -8,18 +8,36 @@ const CallbackPage = () => {
   const { handleCallback, isAuthenticated } = useAuth();
   const [status, setStatus] = useState('processing'); // 'processing', 'success', 'error'
   const [error, setError] = useState(null);
+  const hasProcessed = useRef(false);
 
   useEffect(() => {
     const processCallback = async () => {
+      // Use ref to prevent duplicate processing
+      if (hasProcessed.current) {
+        console.log('DEBUG: Already processed, skipping');
+        return;
+      }
+      hasProcessed.current = true;
+      
       try {
         const code = searchParams.get('code');
         const state = searchParams.get('state');
         const error = searchParams.get('error');
+        const errorDescription = searchParams.get('error_description');
+        
+        console.log('DEBUG: Callback URL params:', {
+          code: code?.substring(0, 10) + '...',
+          state: state?.substring(0, 10) + '...',
+          error,
+          errorDescription,
+          fullParams: Object.fromEntries(searchParams.entries())
+        });
 
         // Check for OAuth errors
         if (error) {
+          const fullError = errorDescription ? `${error}: ${errorDescription}` : error;
           setStatus('error');
-          setError(`Authentication failed: ${error}`);
+          setError(`Authentication failed: ${fullError}`);
           return;
         }
 
@@ -30,25 +48,28 @@ const CallbackPage = () => {
           return;
         }
 
-        // Verify state parameter (CSRF protection)
+        // Verify state parameter (CSRF protection) - only if state was provided
         const storedState = localStorage.getItem('oauth_state');
-        if (!state || state !== storedState) {
+        if (state && storedState && state !== storedState) {
           setStatus('error');
           setError('Invalid state parameter - possible CSRF attack');
           return;
         }
 
-        // Clear stored state
-        localStorage.removeItem('oauth_state');
+        // Clear stored state if it exists
+        if (storedState) {
+          localStorage.removeItem('oauth_state');
+        }
 
         // Process the callback
         const success = await handleCallback(code);
         
         if (success) {
           setStatus('success');
+          // Redirect will happen automatically via Navigate component
         } else {
           setStatus('error');
-          setError('Failed to process authentication');
+          setError('Failed to exchange authorization code for tokens');
         }
       } catch (err) {
         console.error('Callback processing error:', err);
@@ -60,8 +81,13 @@ const CallbackPage = () => {
     processCallback();
   }, [searchParams, handleCallback]);
 
-  // Redirect to home if already authenticated
+  // Redirect to home page if already authenticated
   if (isAuthenticated && status === 'success') {
+    return <Navigate to="/" replace />;
+  }
+  
+  // Also redirect if already authenticated (e.g., on page refresh)
+  if (isAuthenticated && status === 'processing') {
     return <Navigate to="/" replace />;
   }
 

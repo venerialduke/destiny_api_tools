@@ -16,6 +16,10 @@ class AuthService {
   async getAuthUrl() {
     try {
       const response = await authClient.get('/auth/login');
+      // Store state for CSRF protection
+      if (response.data.state) {
+        localStorage.setItem('oauth_state', response.data.state);
+      }
       return response.data.auth_url;
     } catch (error) {
       throw new Error(error.response?.data?.error || 'Failed to get auth URL');
