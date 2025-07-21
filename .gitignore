@@ -130,3 +130,8 @@ docs/_build/
 
 # Claude settings (keep local only)
 .claude/settings.local.json
+
+# Manifest data (large files that can be regenerated)
+data/manifest_raw/
+data/manifest_complete.db
+data/manifest_flattened.db

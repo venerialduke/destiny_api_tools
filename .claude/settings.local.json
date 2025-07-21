@@ -15,7 +15,8 @@
       "Bash(mv:*)",
       "Bash(touch:*)",
       "Bash(curl:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(git ls-tree:*)"
     ],
     "deny": []
   }

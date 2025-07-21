@@ -16,6 +16,8 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import CallbackPage from './pages/auth/CallbackPage';
 import CharacterDashboard from './pages/CharacterDashboard';
+import ExplorationPage from './pages/ExplorationPage';
+import ManifestExplorer from './pages/ManifestExplorer';
 
 // Styles
 import './App.css';
@@ -54,6 +56,10 @@ function App() {
                       </ProtectedRoute>
                     } 
                   />
+                  
+                  {/* Public utility routes */}
+                  <Route path="/explore" element={<ExplorationPage />} />
+                  <Route path="/manifest-explorer" element={<ManifestExplorer />} />
                   
                   {/* Catch all route */}
                   <Route path="*" element={<HomePage />} />

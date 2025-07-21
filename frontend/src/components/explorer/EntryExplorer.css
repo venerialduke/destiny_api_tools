@@ -1,0 +1,391 @@
+.entry-explorer {
+    width: 100%;
+}
+
+.explorer-header {
+    margin-bottom: 20px;
+    padding: 25px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.header-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.back-btn {
+    padding: 10px 16px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.back-btn:hover {
+    background: #5a6268;
+}
+
+.entry-info {
+    flex: 1;
+}
+
+.entry-info h2 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.entry-meta {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.entry-hash {
+    background: #3498db;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 14px;
+    font-family: monospace;
+    font-weight: 600;
+}
+
+.entry-table {
+    background: #95a5a6;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-family: monospace;
+    font-weight: 600;
+}
+
+.entry-description {
+    margin-top: 15px;
+    padding: 15px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
+.entry-description p {
+    margin: 0;
+    color: #555;
+    line-height: 1.5;
+    font-size: 16px;
+}
+
+.explorer-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+    background: white;
+}
+
+.tab-btn {
+    padding: 15px 25px;
+    background: white;
+    border: none;
+    border-right: 1px solid #ddd;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 16px;
+    font-weight: 500;
+    flex: 1;
+    text-align: center;
+}
+
+.tab-btn:last-child {
+    border-right: none;
+}
+
+.tab-btn:hover {
+    background: #f8f9fa;
+}
+
+.tab-btn.active {
+    background: #3498db;
+    color: white;
+}
+
+.explorer-content {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    min-height: 400px;
+}
+
+.raw-data-view {
+    padding: 20px;
+}
+
+.view-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.control-btn {
+    padding: 8px 16px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.control-btn:hover {
+    background: #e9ecef;
+    border-color: #3498db;
+}
+
+.no-data {
+    padding: 60px 20px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 16px;
+    font-style: italic;
+}
+
+.flattened-view {
+    padding: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.category-group {
+    margin-bottom: 30px;
+}
+
+.category-title {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+    font-size: 20px;
+    font-weight: 600;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #3498db;
+}
+
+.category-items {
+    display: grid;
+    gap: 8px;
+}
+
+.flattened-item {
+    display: grid;
+    grid-template-columns: 2fr 80px 3fr;
+    gap: 15px;
+    align-items: center;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    font-size: 14px;
+}
+
+.item-path {
+    font-family: monospace;
+    color: #495057;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.item-type {
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.item-type.string { background: #28a745; color: white; }
+.item-type.numeric { background: #17a2b8; color: white; }
+.item-type.boolean { background: #ffc107; color: #212529; }
+.item-type.array { background: #6f42c1; color: white; }
+.item-type.dict { background: #fd7e14; color: white; }
+
+.item-value {
+    color: #495057;
+    word-break: break-word;
+    font-family: monospace;
+}
+
+.hash-value.clickable {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.hash-value.clickable:hover {
+    background: #c0392b;
+}
+
+.hash-references {
+    padding: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.hash-references h4 {
+    margin: 0 0 20px 0;
+    color: #2c3e50;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.no-refs {
+    padding: 60px 20px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 16px;
+    font-style: italic;
+}
+
+.references-list {
+    display: grid;
+    gap: 12px;
+}
+
+.reference-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s;
+}
+
+.reference-item:hover {
+    border-color: #3498db;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.1);
+}
+
+.reference-path {
+    flex: 1;
+    margin-right: 15px;
+}
+
+.path-text {
+    display: block;
+    font-family: monospace;
+    color: #495057;
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.ref-type {
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.ref-type.single_hash {
+    background: #28a745;
+    color: white;
+}
+
+.ref-type.hash_array {
+    background: #6f42c1;
+    color: white;
+}
+
+.hash-link {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-family: monospace;
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.hash-link:hover {
+    background: #c0392b;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .explorer-header {
+        padding: 20px;
+    }
+    
+    .header-top {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .entry-info h2 {
+        font-size: 24px;
+    }
+    
+    .entry-meta {
+        gap: 10px;
+    }
+    
+    .explorer-tabs {
+        flex-direction: column;
+    }
+    
+    .tab-btn {
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .tab-btn:last-child {
+        border-bottom: none;
+    }
+    
+    .flattened-item {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        text-align: left;
+    }
+    
+    .reference-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .reference-path {
+        margin-right: 0;
+    }
+    
+    .hash-link {
+        align-self: flex-start;
+    }
+}
