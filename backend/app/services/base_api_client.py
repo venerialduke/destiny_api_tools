@@ -31,7 +31,9 @@ class BaseBungieAPIClient:
             access_token: OAuth access token for authenticated requests
         """
         self.access_token = access_token
-        self.base_url = config.api.base_url
+        # Ensure base URL ends with slash for proper urljoin behavior
+        self.base_url = config.api.base_url.rstrip('/') + '/'
+        print(f"🌐 API: Base URL configured as: {self.base_url}")
         
         # Use optimized connection pool
         self.session = get_optimized_session('bungie_api')
@@ -192,10 +194,15 @@ class BaseBungieAPIClient:
         self._rate_limit()
         
         # Build URL
+        print(f"🌐 API: Base URL: {self.base_url}")
+        print(f"🌐 API: Endpoint: {endpoint}")
+        print(f"🌐 API: Endpoint after lstrip: {endpoint.lstrip('/')}")
         url = urljoin(self.base_url, endpoint.lstrip('/'))
+        print(f"🌐 API: Final URL: {url}")
         
         # Prepare headers
         headers = self._get_headers()
+        print(f"🌐 API: Headers: {headers}")
         if 'headers' in kwargs:
             headers.update(kwargs.pop('headers'))
         

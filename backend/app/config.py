@@ -115,10 +115,13 @@ class Config:
     
     def _setup_security_settings(self):
         """Setup security-related settings."""
+        # Default CORS origins for development
+        default_cors = 'http://localhost:3000,https://localhost:3000,http://127.0.0.1:3000,https://127.0.0.1:3000'
+        
         self.security = SecuritySettings(
             secret_key=os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production',
             oauth_redirect_uri=os.environ.get('OAUTH_REDIRECT_URI', 'https://localhost:3000/auth/callback'),
-            cors_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+            cors_origins=os.environ.get('CORS_ORIGINS', default_cors).split(','),
             csrf_enabled=os.environ.get('CSRF_ENABLED', 'true').lower() == 'true',
             session_timeout=int(os.environ.get('SESSION_TIMEOUT', '3600')),
             token_expiry_buffer=int(os.environ.get('TOKEN_EXPIRY_BUFFER', '300'))

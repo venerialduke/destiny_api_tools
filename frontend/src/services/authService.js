@@ -26,26 +26,41 @@ class AuthService extends BaseService {
   }
 
   async getAuthUrl() {
+    console.log('🔐 FRONTEND AUTH: getAuthUrl() called');
+    console.log(`🔐 FRONTEND AUTH: Request URL: ${this.baseURL}/login`);
+    console.log(`🔐 FRONTEND AUTH: API Base URL: ${API_BASE_URL}`);
+    
     const cacheKey = this.createCacheKey('auth-url');
     
     return this.withErrorHandling(
       async () => {
+        console.log('🔐 FRONTEND AUTH: Making fetch request...');
+        
         const response = await fetch(`${this.baseURL}/login`);
         
+        console.log(`🔐 FRONTEND AUTH: Response status: ${response.status}`);
+        console.log(`🔐 FRONTEND AUTH: Response ok: ${response.ok}`);
+        console.log(`🔐 FRONTEND AUTH: Response headers:`, Object.fromEntries(response.headers.entries()));
+        
         if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`❌ FRONTEND AUTH ERROR: ${response.status} - ${errorText}`);
           throw new Error(`Auth URL request failed: ${response.status}`);
         }
         
         const data = await response.json();
+        console.log('🔐 FRONTEND AUTH: Response data:', data);
         
         // Store state for CSRF protection using secure storage
         if (data.state) {
+          console.log('🔐 FRONTEND AUTH: Storing OAuth state');
           tokenStorage.setItem('oauth_state', data.state, { 
             ttl: 10 * 60 * 1000, // 10 minutes
             persistent: false 
           });
         }
         
+        console.log(`🔐 FRONTEND AUTH: Returning auth URL: ${data.auth_url}`);
         return data.auth_url;
       },
       {

@@ -19,14 +19,25 @@ const OptimizedImage = ({
   const getImageUrl = () => {
     if (!icon) return null;
     
-    // If icon is a string (legacy format), use it directly
+    // If icon is a string (legacy format), use backend proxy for HTTPS compatibility
     if (typeof icon === 'string') {
-      return icon.startsWith('http') ? icon : `https://bungie.net${icon}`;
+      if (icon.startsWith('http')) {
+        return icon;
+      } else {
+        // Use backend proxy instead of direct Bungie URL for HTTPS compatibility
+        const cleanPath = icon.startsWith('/') ? icon.substring(1) : icon;
+        return `${process.env.REACT_APP_API_URL}/images/proxy/${cleanPath}?format=webp&size=${size}`;
+      }
     }
     
     // If icon is an object with optimized URLs, use the optimized version
     if (typeof icon === 'object' && icon.optimized && icon.optimized[size]) {
-      return icon.optimized[size];
+      const optimizedUrl = icon.optimized[size];
+      // If it's a relative URL, make it absolute
+      if (optimizedUrl.startsWith('/api/')) {
+        return `${process.env.REACT_APP_API_URL.replace('/api', '')}${optimizedUrl}`;
+      }
+      return optimizedUrl;
     }
     
     // Fallback to proxy URL if available
@@ -72,14 +83,16 @@ const OptimizedImage = ({
   const imageUrl = getImageUrl();
   const fallbackUrl = getFallbackUrl();
   
-  // Debug logging
-  console.log('OptimizedImage Debug:', {
-    icon,
-    size,
-    imageUrl,
-    fallbackUrl,
-    iconType: typeof icon
-  });
+  // Debug logging (only in development)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('OptimizedImage Debug:', {
+      icon,
+      size,
+      imageUrl,
+      fallbackUrl,
+      iconType: typeof icon
+    });
+  }
 
   useEffect(() => {
     if (!imageUrl) {

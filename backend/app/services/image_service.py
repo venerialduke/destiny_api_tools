@@ -185,9 +185,11 @@ class ImageService:
             output_format = format.upper()
             if output_format == 'WEBP':
                 content_type = 'image/webp'
+                save_format = 'WEBP'
                 save_kwargs = {'quality': 85, 'method': 6}
             elif output_format == 'JPG' or output_format == 'JPEG':
                 content_type = 'image/jpeg'
+                save_format = 'JPEG'  # Always use JPEG for PIL
                 save_kwargs = {'quality': 90, 'optimize': True}
                 # Convert RGBA to RGB for JPEG
                 if image.mode in ('RGBA', 'LA'):
@@ -196,6 +198,7 @@ class ImageService:
                     image = background
             elif output_format == 'PNG':
                 content_type = 'image/png'
+                save_format = 'PNG'
                 save_kwargs = {'optimize': True}
             else:
                 # Keep original format
@@ -203,7 +206,7 @@ class ImageService:
             
             # Save processed image
             output_buffer = io.BytesIO()
-            image.save(output_buffer, format=output_format, **save_kwargs)
+            image.save(output_buffer, format=save_format, **save_kwargs)
             processed_data = output_buffer.getvalue()
             
             return processed_data, content_type

@@ -102,35 +102,47 @@ class AuthService:
     
     def _get_user_data_with_characters(self, access_token: str) -> Dict[str, Any]:
         """Get user memberships and character data."""
+        print("🔐 AUTH: Getting user data with characters...")
+        
         # Create API client with access token
+        print("🔐 AUTH: Creating API client...")
         api_client = BaseBungieAPIClient(access_token)
         
         # Get user memberships
+        print("🔐 AUTH: Getting user memberships...")
         memberships_data = api_client.get('/User/GetMembershipsForCurrentUser/')
+        print(f"🔐 AUTH: Memberships response: {memberships_data}")
         user_membership_data = memberships_data['Response']
         
         # Get primary Destiny membership
+        print("🔐 AUTH: Finding primary Destiny membership...")
         primary_membership = None
         if user_membership_data['primaryMembershipId']:
+            print(f"🔐 AUTH: Primary membership ID: {user_membership_data['primaryMembershipId']}")
             # Find the membership with the primary ID
             for membership in user_membership_data['destinyMemberships']:
                 if membership['membershipId'] == user_membership_data['primaryMembershipId']:
                     primary_membership = membership
+                    print(f"🔐 AUTH: Found primary membership: {membership}")
                     break
         
         # If no primary found, use the first available
         if not primary_membership and user_membership_data['destinyMemberships']:
             primary_membership = user_membership_data['destinyMemberships'][0]
+            print(f"🔐 AUTH: No primary found, using first membership: {primary_membership}")
         
         if not primary_membership:
+            print("❌ AUTH: No Destiny memberships found for user")
             raise ValueError("No Destiny memberships found for user")
         
         # Get character data for the primary membership
+        print(f"🔐 AUTH: Getting characters for membership {primary_membership['membershipId']} on platform {primary_membership['membershipType']}")
         characters = self._get_characters(
             api_client, 
             primary_membership['membershipType'], 
             primary_membership['membershipId']
         )
+        print(f"🔐 AUTH: Retrieved {len(characters)} characters")
         
         return {
             'bungie_net_user': user_membership_data['bungieNetUser'],

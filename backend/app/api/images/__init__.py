@@ -46,6 +46,11 @@ def proxy_image(icon_path):
             response.headers['X-Cache-Status'] = 'HIT'
             response.headers['X-Cache-Time'] = cached_time.isoformat()
             
+            # Add CORS headers for cross-origin image requests
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+            
             return response
         
         # Not in cache, download and cache
@@ -58,6 +63,11 @@ def proxy_image(icon_path):
             response = Response(image_data, content_type=content_type)
             response.headers['Cache-Control'] = 'public, max-age=86400'  # 24 hours
             response.headers['X-Cache-Status'] = 'MISS'
+            
+            # Add CORS headers for cross-origin image requests
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
             
             return response
         else:

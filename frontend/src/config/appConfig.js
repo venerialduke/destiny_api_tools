@@ -28,6 +28,9 @@ class AppConfig {
     /**
      * Configure API-related settings
      */
+    console.log('🔧 CONFIG: Setting up API settings');
+    console.log('🔧 CONFIG: REACT_APP_API_URL from env:', process.env.REACT_APP_API_URL);
+    
     this.api = {
       baseURL: process.env.REACT_APP_API_URL || 'https://localhost:5001/api',
       timeout: parseInt(process.env.REACT_APP_API_TIMEOUT) || 30000,
@@ -35,6 +38,8 @@ class AppConfig {
       retryDelay: parseInt(process.env.REACT_APP_RETRY_DELAY) || 1000,
       maxConcurrentRequests: parseInt(process.env.REACT_APP_MAX_CONCURRENT_REQUESTS) || 5
     };
+    
+    console.log('🔧 CONFIG: Final API baseURL:', this.api.baseURL);
   }
 
   _setupUISettings() {
