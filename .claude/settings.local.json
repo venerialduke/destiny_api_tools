@@ -16,6 +16,8 @@
       "Bash(touch:*)",
       "Bash(curl:*)",
       "Bash(cp:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git merge:*)",
       "Bash(venvScripts:*)",
       "Bash(pip install:*)",
       "Bash(if [ ! -d \"venv\" ])",

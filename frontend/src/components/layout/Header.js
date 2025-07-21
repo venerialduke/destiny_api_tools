@@ -32,6 +32,18 @@ const Header = () => {
             >
               Home
             </Link>
+            <Link 
+              to="/explore" 
+              className="text-gray-700 hover:text-blue-600 transition-colors"
+            >
+              Explore
+            </Link>
+            <Link 
+              to="/manifest-explorer" 
+              className="text-gray-700 hover:text-blue-600 transition-colors"
+            >
+              Manifest Explorer
+            </Link>
             {isAuthenticated && (
               <>
                 <Link 

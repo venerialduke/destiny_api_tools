@@ -1,0 +1,83 @@
+.manifest-explorer {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.explorer-header {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.explorer-header h1 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.explorer-header p {
+    color: #7f8c8d;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.error-message {
+    background: #e74c3c;
+    color: white;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.error-message button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading-spinner {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    font-size: 18px;
+    color: #2c3e50;
+}
+
+.explorer-content {
+    min-height: 600px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .manifest-explorer {
+        padding: 10px;
+    }
+    
+    .explorer-header h1 {
+        font-size: 24px;
+    }
+    
+    .explorer-header p {
+        font-size: 14px;
+    }
+}
