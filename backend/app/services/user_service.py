@@ -2,55 +2,39 @@
 User profile service for handling user data management and character operations.
 """
 
-import requests
 from typing import Dict, Any, List, Optional
-from ..config import Config
+from .base_api_client import BaseBungieAPIClient
 
 
 class UserService:
     """Service for managing user profiles and character data."""
     
-    def __init__(self):
-        """Initialize the user service."""
-        self.base_url = Config.BUNGIE_API_BASE_URL
+    def __init__(self, access_token: str):
+        """Initialize the user service with access token."""
+        self.api_client = BaseBungieAPIClient(access_token)
         
-    def get_user_memberships(self, access_token: str) -> Dict[str, Any]:
+    def get_user_memberships(self) -> Dict[str, Any]:
         """Get current user's platform memberships."""
-        headers = Config.get_oauth_headers(access_token)
-        
-        response = requests.get(
-            f"{self.base_url}/User/GetMembershipsForCurrentUser/",
-            headers=headers
-        )
-        response.raise_for_status()
-        
-        return response.json()['Response']
+        response = self.api_client.get('/User/GetMembershipsForCurrentUser/')
+        return response['Response']
     
-    def get_user_profile_with_characters(self, access_token: str, membership_type: int, 
+    def get_user_profile_with_characters(self, membership_type: int, 
                                        membership_id: str) -> Dict[str, Any]:
         """Get user profile with character data."""
-        headers = Config.get_oauth_headers(access_token)
-        
-        response = requests.get(
-            f"{self.base_url}/Destiny2/{membership_type}/Profile/{membership_id}/?components=200",
-            headers=headers
+        response = self.api_client.get(
+            f'/Destiny2/{membership_type}/Profile/{membership_id}/',
+            params={'components': '200'}
         )
-        response.raise_for_status()
-        
-        return response.json()['Response']
+        return response['Response']
     
-    def get_character_details(self, access_token: str, membership_type: int, 
+    def get_character_details(self, membership_type: int, 
                             membership_id: str, character_id: str) -> Dict[str, Any]:
         """Get detailed character information."""
-        headers = Config.get_oauth_headers(access_token)
-        
-        response = requests.get(
-            f"{self.base_url}/Destiny2/{membership_type}/Profile/{membership_id}/Character/{character_id}/?components=200,205",
-            headers=headers
+        response = self.api_client.get(
+            f'/Destiny2/{membership_type}/Profile/{membership_id}/Character/{character_id}/',
+            params={'components': '200,205'}
         )
-        response.raise_for_status()
-        
-        return response.json()['Response']
+        return response['Response']
     
     def format_character_data(self, characters_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Format raw character data for frontend consumption."""

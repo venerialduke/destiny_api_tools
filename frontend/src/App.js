@@ -18,6 +18,7 @@ import CallbackPage from './pages/auth/CallbackPage';
 import CharacterDashboard from './pages/CharacterDashboard';
 import ExplorationPage from './pages/ExplorationPage';
 import ManifestExplorer from './pages/ManifestExplorer';
+import ImageDemoPage from './pages/demo/ImageDemoPage';
 
 // Styles
 import './App.css';
@@ -46,6 +47,7 @@ function App() {
                   <Route path="/" element={<HomePage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/auth/callback" element={<CallbackPage />} />
+                  <Route path="/demo" element={<ImageDemoPage />} />
                   
                   {/* Protected routes */}
                   <Route 

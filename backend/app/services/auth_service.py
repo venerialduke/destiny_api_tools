@@ -7,6 +7,7 @@ import secrets
 from typing import Dict, Any
 from urllib.parse import urlencode
 from ..config import Config
+from .base_api_client import BaseBungieAPIClient
 
 
 class AuthService:
@@ -101,40 +102,47 @@ class AuthService:
     
     def _get_user_data_with_characters(self, access_token: str) -> Dict[str, Any]:
         """Get user memberships and character data."""
-        headers = Config.get_oauth_headers(access_token)
+        print("🔐 AUTH: Getting user data with characters...")
+        
+        # Create API client with access token
+        print("🔐 AUTH: Creating API client...")
+        api_client = BaseBungieAPIClient(access_token)
         
         # Get user memberships
-        response = requests.get(
-            f"{Config.BUNGIE_API_BASE_URL}/User/GetMembershipsForCurrentUser/",
-            headers=headers
-        )
-        response.raise_for_status()
-        
-        memberships_data = response.json()
+        print("🔐 AUTH: Getting user memberships...")
+        memberships_data = api_client.get('/User/GetMembershipsForCurrentUser/')
+        print(f"🔐 AUTH: Memberships response: {memberships_data}")
         user_membership_data = memberships_data['Response']
         
         # Get primary Destiny membership
+        print("🔐 AUTH: Finding primary Destiny membership...")
         primary_membership = None
         if user_membership_data['primaryMembershipId']:
+            print(f"🔐 AUTH: Primary membership ID: {user_membership_data['primaryMembershipId']}")
             # Find the membership with the primary ID
             for membership in user_membership_data['destinyMemberships']:
                 if membership['membershipId'] == user_membership_data['primaryMembershipId']:
                     primary_membership = membership
+                    print(f"🔐 AUTH: Found primary membership: {membership}")
                     break
         
         # If no primary found, use the first available
         if not primary_membership and user_membership_data['destinyMemberships']:
             primary_membership = user_membership_data['destinyMemberships'][0]
+            print(f"🔐 AUTH: No primary found, using first membership: {primary_membership}")
         
         if not primary_membership:
+            print("❌ AUTH: No Destiny memberships found for user")
             raise ValueError("No Destiny memberships found for user")
         
         # Get character data for the primary membership
+        print(f"🔐 AUTH: Getting characters for membership {primary_membership['membershipId']} on platform {primary_membership['membershipType']}")
         characters = self._get_characters(
-            access_token, 
+            api_client, 
             primary_membership['membershipType'], 
             primary_membership['membershipId']
         )
+        print(f"🔐 AUTH: Retrieved {len(characters)} characters")
         
         return {
             'bungie_net_user': user_membership_data['bungieNetUser'],
@@ -144,17 +152,12 @@ class AuthService:
             'characters': characters
         }
     
-    def _get_characters(self, access_token: str, membership_type: int, membership_id: str) -> list:
+    def _get_characters(self, api_client: BaseBungieAPIClient, membership_type: int, membership_id: str) -> list:
         """Get character data for a specific membership."""
-        headers = Config.get_oauth_headers(access_token)
-        
-        response = requests.get(
-            f"{Config.BUNGIE_API_BASE_URL}/Destiny2/{membership_type}/Profile/{membership_id}/?components=200",
-            headers=headers
+        profile_data = api_client.get(
+            f'/Destiny2/{membership_type}/Profile/{membership_id}/',
+            params={'components': '200'}
         )
-        response.raise_for_status()
-        
-        profile_data = response.json()
         
         if 'characters' not in profile_data['Response'] or 'data' not in profile_data['Response']['characters']:
             return []

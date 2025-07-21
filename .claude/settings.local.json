@@ -17,7 +17,21 @@
       "Bash(curl:*)",
       "Bash(cp:*)",
       "Bash(git ls-tree:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(venvScripts:*)",
+      "Bash(pip install:*)",
+      "Bash(if [ ! -d \"venv\" ])",
+      "Bash(then python -m venv venv)",
+      "Bash(fi)",
+      "Bash(venv/Scripts/activate.bat:*)",
+      "Bash(npm run build:*)",
+      "Bash(cat:*)",
+      "Bash(timeout:*)",
+      "Bash(copy \"..\\backend\\certs\\localhost+2.pem\" .)",
+      "Bash(copy \"..\\backend\\certs\\localhost+2-key.pem\" .)",
+      "Bash(tasklist:*)",
+      "Bash(wmic:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": []
   }
