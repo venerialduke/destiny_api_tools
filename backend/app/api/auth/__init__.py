@@ -12,41 +12,69 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/login', methods=['GET'])
 def login():
     """Initiate OAuth login flow."""
+    print("🔐 AUTH: /login endpoint called")
+    print(f"🔐 AUTH: Request method: {request.method}")
+    print(f"🔐 AUTH: Request headers: {dict(request.headers)}")
+    
     try:
+        print("🔐 AUTH: Creating AuthService instance...")
         auth_service = AuthService()
+        print("🔐 AUTH: Getting authorization URL...")
         auth_data = auth_service.get_authorization_url()
-        return jsonify({
+        
+        response_data = {
             'auth_url': auth_data['auth_url'],
             'state': auth_data['state'],
             'status': 'redirect_required'
-        })
+        }
+        print(f"🔐 AUTH: Sending response: {response_data}")
+        return jsonify(response_data)
     except Exception as e:
+        print(f"❌ AUTH ERROR: {str(e)}")
+        import traceback
+        print(f"❌ AUTH TRACEBACK: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
 
 
 @auth_bp.route('/callback', methods=['POST'])
 def oauth_callback():
     """Handle OAuth callback and exchange code for tokens."""
+    print("🔐 AUTH: /callback endpoint called")
     try:
         data = request.get_json()
+        print(f"🔐 AUTH: Callback request data: {data}")
+        
         code = data.get('code')
+        print(f"🔐 AUTH: Authorization code: {code}")
         
         if not code:
+            print("❌ AUTH: No authorization code provided")
             return jsonify({'error': 'Authorization code required'}), 400
         
+        print("🔐 AUTH: Validating OAuth code...")
         if not validate_oauth_code(code):
+            print("❌ AUTH: OAuth code validation failed")
             return jsonify({'error': 'Invalid authorization code'}), 400
         
+        print("🔐 AUTH: Creating AuthService and exchanging code for tokens...")
         auth_service = AuthService()
         tokens = auth_service.exchange_code_for_tokens(code)
         
-        return jsonify({
+        print(f"🔐 AUTH: Token exchange successful, got tokens: {list(tokens.keys())}")
+        
+        response_data = {
             'access_token': tokens['access_token'],
             'refresh_token': tokens['refresh_token'],
             'expires_in': tokens['expires_in'],
             'user_data': tokens['user_data']
-        })
+        }
+        print(f"🔐 AUTH: Sending callback response with user_data keys: {list(tokens.get('user_data', {}).keys())}")
+        
+        return jsonify(response_data)
     except Exception as e:
+        print(f"❌ AUTH CALLBACK ERROR: {str(e)}")
+        import traceback
+        print(f"❌ AUTH CALLBACK TRACEBACK: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
 
 

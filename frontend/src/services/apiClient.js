@@ -1,175 +1,237 @@
-import axios from 'axios';
+import BaseService from './base/BaseService';
 import { authService } from './authService';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://localhost:5001/api';
 
-class ApiClient {
+class ApiClient extends BaseService {
   constructor() {
-    this.client = axios.create({
-      baseURL: API_BASE_URL,
-      timeout: 10000,
-    });
+    // Create a simple API client with token management
+    const apiClient = {
+      get: (url, config = {}) => this._makeRequest('GET', url, null, config),
+      post: (url, data, config = {}) => this._makeRequest('POST', url, data, config),
+      put: (url, data, config = {}) => this._makeRequest('PUT', url, data, config),
+      delete: (url, config = {}) => this._makeRequest('DELETE', url, null, config)
+    };
+    
+    super(apiClient);
+    this.baseURL = API_BASE_URL;
+  }
 
-    // Request interceptor to add auth headers
-    this.client.interceptors.request.use(
-      (config) => {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      (error) => {
-        return Promise.reject(error);
-      }
-    );
+  /**
+   * Internal method to make authenticated requests with token management
+   */
+  async _makeRequest(method, url, data = null, config = {}) {
+    const fullUrl = url.startsWith('http') ? url : `${this.baseURL}${url}`;
+    
+    // Get auth headers
+    const token = localStorage.getItem('accessToken');
+    const headers = {
+      'Content-Type': 'application/json',
+      ...config.headers
+    };
+    
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
 
-    // Response interceptor to handle token refresh
-    this.client.interceptors.response.use(
-      (response) => response,
-      async (error) => {
-        const originalRequest = error.config;
+    const requestConfig = {
+      method,
+      headers,
+      ...config
+    };
 
-        // If the error is 401 and we haven't already tried to refresh
-        if (error.response?.status === 401 && !originalRequest._retry) {
-          originalRequest._retry = true;
+    if (data && (method === 'POST' || method === 'PUT')) {
+      requestConfig.body = JSON.stringify(data);
+    }
 
+    try {
+      const response = await fetch(fullUrl, requestConfig);
+      
+      // Handle 401 with token refresh
+      if (response.status === 401 && token) {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken && !config._isRetry) {
           try {
-            const refreshToken = localStorage.getItem('refreshToken');
-            if (refreshToken) {
-              const tokens = await authService.refreshToken(refreshToken);
-              
-              // Update stored tokens
-              localStorage.setItem('accessToken', tokens.accessToken);
-              localStorage.setItem('refreshToken', tokens.refreshToken);
-              
-              // Retry the original request with new token
-              originalRequest.headers.Authorization = `Bearer ${tokens.accessToken}`;
-              return this.client(originalRequest);
+            const tokens = await authService.refreshToken(refreshToken);
+            
+            // Update stored tokens
+            localStorage.setItem('accessToken', tokens.accessToken);
+            localStorage.setItem('refreshToken', tokens.refreshToken);
+            
+            // Retry the original request with new token
+            const retryHeaders = {
+              ...headers,
+              Authorization: `Bearer ${tokens.accessToken}`
+            };
+            
+            const retryResponse = await fetch(fullUrl, {
+              ...requestConfig,
+              headers: retryHeaders,
+              _isRetry: true
+            });
+            
+            if (!retryResponse.ok) {
+              throw new Error(`Request failed: ${retryResponse.status}`);
             }
+            
+            return retryResponse.json();
           } catch (refreshError) {
             // Refresh failed, redirect to login
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('userData');
             window.location.href = '/login';
-            return Promise.reject(refreshError);
+            throw new Error('Authentication failed');
           }
+        } else {
+          throw new Error('Authentication required');
         }
-
-        return Promise.reject(error);
       }
-    );
+      
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+      
+      return response.json();
+    } catch (error) {
+      throw error;
+    }
   }
 
   // Auth endpoints
   async login() {
-    const response = await this.client.get('/auth/login');
-    return response.data;
+    const cacheKey = this.createCacheKey('auth/login');
+    
+    return this.withErrorHandling(
+      async () => this._makeRequest('GET', '/auth/login'),
+      { cacheKey, cacheTTL: 60000, retry: 1 }
+    );
   }
 
   async exchangeCode(code) {
-    const response = await this.client.post('/auth/callback', { code });
-    return response.data;
+    return this.withErrorHandling(
+      async () => this._makeRequest('POST', '/auth/callback', { code }),
+      { retry: 2, deduplicateRequests: false }
+    );
   }
 
   async refreshTokens(refreshToken) {
-    const response = await this.client.post('/auth/refresh', { 
-      refresh_token: refreshToken 
-    });
-    return response.data;
+    return this.withErrorHandling(
+      async () => this._makeRequest('POST', '/auth/refresh', { refresh_token: refreshToken }),
+      { retry: 2, deduplicateRequests: false }
+    );
   }
 
   // User endpoints
   async getUserProfile() {
-    const response = await this.client.get('/core/user/profile');
-    return response.data;
+    const cacheKey = this.createCacheKey('core/user/profile');
+    
+    return this.withErrorHandling(
+      async () => this._makeRequest('GET', '/core/user/profile'),
+      { cacheKey, cacheTTL: 300000, retry: 2 } // 5 minute cache
+    );
   }
 
   async getUserMemberships() {
-    const response = await this.client.get('/core/user/memberships');
-    return response.data;
+    const cacheKey = this.createCacheKey('core/user/memberships');
+    
+    return this.withErrorHandling(
+      async () => this._makeRequest('GET', '/core/user/memberships'),
+      { cacheKey, cacheTTL: 600000, retry: 2 } // 10 minute cache
+    );
   }
 
   async getCharacters(membershipType, membershipId) {
-    const response = await this.client.get(
-      `/core/user/characters/${membershipType}/${membershipId}`
+    const cacheKey = this.createCacheKey('characters', { membershipType, membershipId });
+    
+    return this.withErrorHandling(
+      async () => this._makeRequest('GET', `/core/user/characters/${membershipType}/${membershipId}`),
+      { cacheKey, cacheTTL: 300000, retry: 2 } // 5 minute cache
     );
-    return response.data;
   }
 
   async getCharacterDetails(membershipType, membershipId, characterId) {
-    const response = await this.client.get(
-      `/core/user/character/${membershipType}/${membershipId}/${characterId}`
+    const cacheKey = this.createCacheKey('character-details', { membershipType, membershipId, characterId });
+    
+    return this.withErrorHandling(
+      async () => this._makeRequest('GET', `/core/user/character/${membershipType}/${membershipId}/${characterId}`),
+      { cacheKey, cacheTTL: 300000, retry: 2 } // 5 minute cache
     );
-    return response.data;
   }
 
   async getCharacterEquipment(membershipType, membershipId, characterId) {
-    const response = await this.client.get(
-      `/core/user/character/${membershipType}/${membershipId}/${characterId}/equipment`
+    const cacheKey = this.createCacheKey('character-equipment', { membershipType, membershipId, characterId });
+    
+    return this.withErrorHandling(
+      async () => this._makeRequest('GET', `/core/user/character/${membershipType}/${membershipId}/${characterId}/equipment`),
+      { cacheKey, cacheTTL: 60000, retry: 2 } // 1 minute cache for equipment
     );
-    return response.data;
   }
 
   async searchPlayer(bungieName, membershipType) {
-    const response = await this.client.post(
-      `/core/user/search/${membershipType}`,
-      { bungie_name: bungieName }
+    const cacheKey = this.createCacheKey('search-player', { bungieName, membershipType });
+    
+    return this.withErrorHandling(
+      async () => this._makeRequest('POST', `/core/user/search/${membershipType}`, { bungie_name: bungieName }),
+      { cacheKey, cacheTTL: 300000, retry: 1 } // 5 minute cache for searches
     );
-    return response.data;
   }
 
   // Core endpoints
   async getHealthCheck() {
-    const response = await this.client.get('/core/health');
-    return response.data;
+    return this.withErrorHandling(
+      async () => this._makeRequest('GET', '/core/health'),
+      { retry: 1, cacheTTL: 30000 } // 30 second cache for health checks
+    );
   }
 
   async getManifest() {
-    const response = await this.client.get('/core/manifest');
-    return response.data;
+    const cacheKey = this.createCacheKey('core/manifest');
+    
+    return this.withErrorHandling(
+      async () => this._makeRequest('GET', '/core/manifest'),
+      { cacheKey, cacheTTL: 3600000, retry: 2 } // 1 hour cache for manifest
+    );
   }
 
   async getSettings() {
-    const response = await this.client.get('/core/settings');
-    return response.data;
+    const cacheKey = this.createCacheKey('core/settings');
+    
+    return this.withErrorHandling(
+      async () => this._makeRequest('GET', '/core/settings'),
+      { cacheKey, cacheTTL: 600000, retry: 2 } // 10 minute cache for settings
+    );
   }
 
-  // Generic request methods
+  // Generic request methods with BaseService error handling
   async get(url, config = {}) {
-    const response = await this.client.get(url, config);
-    return response.data;
+    const cacheKey = config.cacheKey || this.createCacheKey(url);
+    
+    return this.withErrorHandling(
+      async () => this._makeRequest('GET', url, null, config),
+      { cacheKey, cacheTTL: config.cacheTTL || 300000, retry: config.retry || 2 }
+    );
   }
 
   async post(url, data = {}, config = {}) {
-    const response = await this.client.post(url, data, config);
-    return response.data;
+    return this.withErrorHandling(
+      async () => this._makeRequest('POST', url, data, config),
+      { retry: config.retry || 2, deduplicateRequests: false }
+    );
   }
 
   async put(url, data = {}, config = {}) {
-    const response = await this.client.put(url, data, config);
-    return response.data;
+    return this.withErrorHandling(
+      async () => this._makeRequest('PUT', url, data, config),
+      { retry: config.retry || 2, deduplicateRequests: false }
+    );
   }
 
   async delete(url, config = {}) {
-    const response = await this.client.delete(url, config);
-    return response.data;
-  }
-
-  // Error handling helper
-  handleError(error) {
-    if (error.response) {
-      // Server responded with error status
-      const message = error.response.data?.error || error.response.data?.message || 'Server error';
-      throw new Error(message);
-    } else if (error.request) {
-      // Request was made but no response received
-      throw new Error('Network error - please check your connection');
-    } else {
-      // Something else happened
-      throw new Error(error.message || 'An unexpected error occurred');
-    }
+    return this.withErrorHandling(
+      async () => this._makeRequest('DELETE', url, null, config),
+      { retry: config.retry || 1, deduplicateRequests: false }
+    );
   }
 }
 

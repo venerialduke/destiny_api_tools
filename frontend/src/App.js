@@ -16,6 +16,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import CallbackPage from './pages/auth/CallbackPage';
 import CharacterDashboard from './pages/CharacterDashboard';
+import ImageDemoPage from './pages/demo/ImageDemoPage';
 
 // Styles
 import './App.css';
@@ -44,6 +45,7 @@ function App() {
                   <Route path="/" element={<HomePage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/auth/callback" element={<CallbackPage />} />
+                  <Route path="/demo" element={<ImageDemoPage />} />
                   
                   {/* Protected routes */}
                   <Route 
