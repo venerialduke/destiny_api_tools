@@ -7,44 +7,119 @@ const EntryList = ({ tableName, onEntrySelect, onBack }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchInput, setSearchInput] = useState(''); // For immediate UI updates
     const [currentPage, setCurrentPage] = useState(1);
     const [pagination, setPagination] = useState({});
     const [totalEntries, setTotalEntries] = useState(0);
+    const [apiCallCounter, setApiCallCounter] = useState(0);
     
     const entriesPerPage = 50;
 
     useEffect(() => {
+        console.log('🔄 useEffect triggered - about to loadEntries');
+        console.log('  tableName:', tableName);
+        console.log('  currentPage:', currentPage);
+        console.log('  searchTerm:', searchTerm);
         loadEntries();
     }, [tableName, currentPage, searchTerm]);
 
+    // Debounced search effect
     useEffect(() => {
-        // Reset page when search changes
-        if (currentPage !== 1) {
-            setCurrentPage(1);
-        } else {
-            loadEntries();
-        }
-    }, [searchTerm]);
+        const timeoutId = setTimeout(() => {
+            console.log('⏱️ Search timeout triggered, updating searchTerm:', searchInput);
+            console.log('  Previous searchTerm:', searchTerm);
+            console.log('  New searchTerm will be:', searchInput);
+            setSearchTerm(searchInput);
+            if (currentPage !== 1) {
+                console.log('  Resetting page to 1');
+                setCurrentPage(1);
+            }
+        }, 500); // 500ms delay
+
+        return () => {
+            clearTimeout(timeoutId);
+        };
+    }, [searchInput]); // REMOVED currentPage dependency to prevent race conditions
+
+    // Debug effect to track entries state changes
+    useEffect(() => {
+        console.log('🔄 Entries state changed:');
+        console.log('  new entries length:', entries.length);
+        console.log('  entries is array:', Array.isArray(entries));
+        console.log('  first entry:', entries[0]);
+    }, [entries]);
 
     const loadEntries = async () => {
+        const callId = apiCallCounter + 1;
+        setApiCallCounter(callId);
+        
+        console.log(`📋 [Call #${callId}] Loading entries for table:`);
+        console.log('  tableName:', tableName);
+        console.log('  currentPage:', currentPage);
+        console.log('  searchTerm:', searchTerm);
+        console.log('  entriesPerPage:', entriesPerPage);
+        
         setLoading(true);
         setError(null);
         
         try {
-            const response = await apiClient.get(`/manifest/explorer/table/${tableName}`, {
-                params: {
-                    page: currentPage,
-                    limit: entriesPerPage,
-                    search: searchTerm
-                }
+            const requestParams = {
+                page: currentPage,
+                limit: entriesPerPage,
+                search: searchTerm
+            };
+            
+            console.log(`🌐 [Call #${callId}] Making API request with params:`);
+            console.log('  page:', requestParams.page);
+            console.log('  limit:', requestParams.limit);
+            console.log('  search:', requestParams.search);
+            
+            // Use _makeRequest directly to bypass BaseService parameter issues
+            const response = await apiClient._makeRequest('GET', `/manifest/explorer/table/${tableName}`, null, {
+                params: requestParams
             });
 
-            setEntries(response.entries);
-            setPagination(response.pagination);
-            setTotalEntries(response.pagination.total);
+            console.log(`✅ [Call #${callId}] API response received:`);
+            console.log('  responseType:', typeof response);
+            console.log('  responseKeys:', Object.keys(response || {}));
+            console.log('  response.entries length:', response.entries?.length || 0);
+            console.log('  response.pagination:', response.pagination);
+            console.log('  response.search:', response.search);
+            console.log('  first entry:', response.entries?.[0]);
+
+            // Handle potential BaseService wrapping
+            const responseData = response.data || response;
+            const entries = responseData.entries || [];
+            const pagination = responseData.pagination || {};
+            
+            console.log(`🔄 [Call #${callId}] Setting state with:`);
+            console.log('  entries length:', entries.length);
+            console.log('  entries array:', Array.isArray(entries));
+            console.log('  entries sample:', entries.slice(0, 2));
+            console.log('  pagination:', pagination);
+            console.log('  totalEntries:', pagination.total || 0);
+            
+            setEntries(entries);
+            setPagination(pagination);
+            setTotalEntries(pagination.total || 0);
+            
+            // Add a small delay to check if state updates properly
+            setTimeout(() => {
+                console.log('⏰ State after update (delayed check):');
+                console.log('  entries state length:', entries.length);
+                console.log('  first entry after state set:', entries[0]);
+            }, 100);
         } catch (err) {
+            console.error('❌ Error loading entries:', {
+                tableName,
+                currentPage,
+                searchTerm,
+                error: err.message,
+                status: err.response?.status,
+                statusText: err.response?.statusText,
+                data: err.response?.data
+            });
             setError(`Failed to load entries from ${tableName}`);
-            console.error('Error loading entries:', err);
         } finally {
             setLoading(false);
         }
@@ -63,8 +138,15 @@ const EntryList = ({ tableName, onEntrySelect, onBack }) => {
     };
 
     const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
-        setCurrentPage(1); // Reset to first page when searching
+        const value = e.target.value;
+        console.log('🔍 Search input changed:');
+        console.log('  value:', value);
+        console.log('  previousSearchInput:', searchInput);
+        console.log('  previousSearchTerm:', searchTerm);
+        console.log('  currentPage:', currentPage);
+        console.log('  tableName:', tableName);
+        setSearchInput(value); // Update immediate UI state
+        // The debounced effect will handle updating searchTerm
     };
 
     const renderPagination = () => {
@@ -143,11 +225,72 @@ const EntryList = ({ tableName, onEntrySelect, onBack }) => {
                     <input
                         type="text"
                         placeholder="Search entries by name or description..."
-                        value={searchTerm}
+                        value={searchInput}
                         onChange={handleSearchChange}
                         className="search-input"
+                        style={{
+                            color: '#2c3e50',
+                            backgroundColor: '#ffffff',
+                            caretColor: '#2c3e50'
+                        }}
                     />
                 </div>
+            </div>
+
+            {/* Debug info - always visible */}
+            <div style={{
+                background: '#f0f0f0', 
+                padding: '10px', 
+                margin: '10px 0', 
+                border: '1px solid #ccc',
+                fontSize: '12px',
+                fontFamily: 'monospace'
+            }}>
+                <strong>Debug Info:</strong><br />
+                Loading: {loading.toString()}<br />
+                Error: {error || 'none'}<br />
+                Entries Length: {entries.length}<br />
+                Entries is Array: {Array.isArray(entries).toString()}<br />
+                Total Entries: {totalEntries}<br />
+                Search Term: "{searchTerm}"<br />
+                Search Input: "{searchInput}"<br />
+                First Entry Hash: {entries[0]?.hash || 'none'}<br />
+                <button 
+                    onClick={() => {
+                        console.log('🧪 Manual search test - forcing searchTerm = "gjallarhorn"');
+                        setSearchTerm('gjallarhorn');
+                        setSearchInput('gjallarhorn');
+                    }}
+                    style={{background: 'red', color: 'white', padding: '5px'}}
+                >
+                    TEST: Force Search "gjallarhorn"
+                </button>
+                <br />
+                <button 
+                    onClick={async () => {
+                        console.log('🧪 BLUE BUTTON CLICKED - Direct API test starting...');
+                        console.log('  tableName:', tableName);
+                        
+                        try {
+                            console.log('🧪 About to make direct API call...');
+                            
+                            // Try direct _makeRequest to bypass BaseService
+                            console.log('🧪 Testing direct _makeRequest...');
+                            const directResponse = await apiClient._makeRequest('GET', `/manifest/explorer/table/${tableName}`, null, {
+                                params: { page: 1, limit: 5, search: 'gjallarhorn' }
+                            });
+                            console.log('🧪 Direct _makeRequest SUCCESS:', directResponse);
+                            
+                            alert('Direct API call completed - check console');
+                        } catch (err) {
+                            console.error('🧪 Direct API ERROR:', err);
+                            alert('Direct API call failed - check console');
+                        }
+                    }}
+                    style={{background: 'blue', color: 'white', padding: '5px'}}
+                >
+                    TEST: Direct API Call
+                </button>
             </div>
 
             {error && (
@@ -163,11 +306,34 @@ const EntryList = ({ tableName, onEntrySelect, onBack }) => {
             ) : (
                 <>
                     <div className="entries-container">
-                        {entries.map((entry, index) => (
+                        {/* Simplified render logging */}
+                        <div style={{background: 'lightblue', padding: '10px', margin: '10px'}}>
+                            Test element - this should always be visible
+                        </div>
+                        
+                        {Array.isArray(entries) && entries.length > 0 ? (
+                            <div style={{background: 'lightgreen', padding: '10px', margin: '10px'}}>
+                                About to render {entries.length} entries
+                                {console.log('✅ Rendering', entries.length, 'entries')}
+                            </div>
+                        ) : (
+                            <div style={{background: 'lightcoral', padding: '10px', margin: '10px'}}>
+                                No entries to render - length: {entries.length}, isArray: {Array.isArray(entries).toString()}
+                            </div>
+                        )}
+                        
+                        {Array.isArray(entries) && entries.length > 0 && entries.map((entry, index) => (
                             <div
                                 key={entry.hash}
                                 className="entry-card"
                                 onClick={() => handleEntryClick(entry)}
+                                style={{
+                                    border: '2px solid red',
+                                    margin: '10px',
+                                    padding: '10px',
+                                    backgroundColor: 'yellow',
+                                    minHeight: '100px'
+                                }}
                             >
                                 <div className="entry-header">
                                     <h3 className="entry-name">
@@ -190,13 +356,20 @@ const EntryList = ({ tableName, onEntrySelect, onBack }) => {
                                 </div>
                             </div>
                         ))}
+                        
+                        <div style={{background: 'orange', padding: '10px', margin: '10px'}}>
+                            Finished rendering entries section - {entries.length} entries
+                        </div>
                     </div>
 
                     {entries.length === 0 && !loading && (
                         <div className="no-entries">
                             <p>No entries found{searchTerm && ` matching "${searchTerm}"`}.</p>
                             {searchTerm && (
-                                <button onClick={() => setSearchTerm('')} className="clear-search-btn">
+                                <button onClick={() => {
+                                    setSearchInput('');
+                                    setSearchTerm('');
+                                }} className="clear-search-btn">
                                     Clear Search
                                 </button>
                             )}

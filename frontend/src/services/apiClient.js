@@ -21,7 +21,37 @@ class ApiClient extends BaseService {
    * Internal method to make authenticated requests with token management
    */
   async _makeRequest(method, url, data = null, config = {}) {
-    const fullUrl = url.startsWith('http') ? url : `${this.baseURL}${url}`;
+    let fullUrl = url.startsWith('http') ? url : `${this.baseURL}${url}`;
+    
+    // Handle query parameters for GET requests
+    if (config.params && Object.keys(config.params).length > 0) {
+      console.log('🔧 Processing URL params:');
+      console.log('  config.params:', config.params);
+      
+      const searchParams = new URLSearchParams();
+      Object.entries(config.params).forEach(([key, value]) => {
+        console.log(`  Processing param ${key}:`, value, typeof value, `"${value}"`);
+        if (value !== null && value !== undefined) {
+          searchParams.append(key, String(value));
+          console.log(`  ✅ Added ${key}="${value}" (${typeof value})`);
+        } else {
+          console.log(`  ❌ Skipped ${key} (null/undefined)`);
+        }
+      });
+      
+      const queryString = searchParams.toString();
+      console.log('  Final query string:', queryString);
+      
+      if (queryString) {
+        fullUrl += (fullUrl.includes('?') ? '&' : '?') + queryString;
+      }
+    }
+    
+    console.log('🌐 ApiClient making request:');
+    console.log('  method:', method);
+    console.log('  url:', url);
+    console.log('  fullUrl:', fullUrl);
+    console.log('  params:', config.params);
     
     // Get auth headers
     const token = localStorage.getItem('accessToken');
@@ -92,7 +122,13 @@ class ApiClient extends BaseService {
         throw new Error(`Request failed: ${response.status}`);
       }
       
-      return response.json();
+      const jsonResponse = await response.json();
+      console.log('📦 ApiClient raw response:');
+      console.log('  url:', fullUrl);
+      console.log('  status:', response.status);
+      console.log('  response keys:', Object.keys(jsonResponse || {}));
+      console.log('  response:', jsonResponse);
+      return jsonResponse;
     } catch (error) {
       throw error;
     }
