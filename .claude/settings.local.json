@@ -31,7 +31,11 @@
       "Bash(copy \"..\\backend\\certs\\localhost+2-key.pem\" .)",
       "Bash(tasklist:*)",
       "Bash(wmic:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(head:*)",
+      "Bash(grep:*)",
+      "Bash(tasklist:*)",
+      "Bash(wmic process where:*)"
     ],
     "deny": []
   }

@@ -18,6 +18,7 @@ import CallbackPage from './pages/auth/CallbackPage';
 import CharacterDashboard from './pages/CharacterDashboard';
 import ExplorationPage from './pages/ExplorationPage';
 import ManifestExplorer from './pages/ManifestExplorer';
+import EquipableSetsPage from './pages/EquipableSetsPage';
 import ImageDemoPage from './pages/demo/ImageDemoPage';
 
 // Styles
@@ -62,6 +63,7 @@ function App() {
                   {/* Public utility routes */}
                   <Route path="/explore" element={<ExplorationPage />} />
                   <Route path="/manifest-explorer" element={<ManifestExplorer />} />
+                  <Route path="/equipable-sets" element={<EquipableSetsPage />} />
                   
                   {/* Catch all route */}
                   <Route path="*" element={<HomePage />} />

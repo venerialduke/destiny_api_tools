@@ -44,6 +44,12 @@ const Header = () => {
             >
               Manifest Explorer
             </Link>
+            <Link 
+              to="/equipable-sets" 
+              className="text-gray-700 hover:text-blue-600 transition-colors"
+            >
+              Equipable Sets
+            </Link>
             {isAuthenticated && (
               <>
                 <Link 

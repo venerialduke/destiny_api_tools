@@ -1,0 +1,230 @@
+/* Destiny Image Component Styles */
+
+.destiny-image-container {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.destiny-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+    border-radius: inherit;
+}
+
+.destiny-image-container.loading .destiny-image {
+    opacity: 0;
+}
+
+.destiny-image-container:not(.loading) .destiny-image {
+    opacity: 1;
+}
+
+/* Loading Placeholder */
+.destiny-image-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+    border-radius: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-shimmer {
+    width: 60%;
+    height: 60%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 100%
+    );
+    border-radius: 4px;
+    animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Error State */
+.destiny-image-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(244, 67, 54, 0.1);
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    border-radius: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f44336;
+    font-size: 1.2rem;
+}
+
+/* Size Variants */
+.destiny-image-container.size-small {
+    width: 32px;
+    height: 32px;
+}
+
+.destiny-image-container.size-medium {
+    width: 64px;
+    height: 64px;
+}
+
+.destiny-image-container.size-large {
+    width: 96px;
+    height: 96px;
+}
+
+.destiny-image-container.size-xl {
+    width: 128px;
+    height: 128px;
+}
+
+/* Use Case Specific Styles */
+.destiny-image-container.use-case-thumbnail {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+}
+
+.destiny-image-container.use-case-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+}
+
+.destiny-image-container.use-case-card {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+}
+
+.destiny-image-container.use-case-emblem {
+    width: 120px;
+    height: 60px;
+    border-radius: 8px;
+}
+
+.destiny-image-container.use-case-armor {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(74, 144, 226, 0.1) 0%, rgba(53, 122, 189, 0.1) 100%);
+    border: 1px solid rgba(74, 144, 226, 0.2);
+}
+
+.destiny-image-container.use-case-weapon {
+    width: 80px;
+    height: 40px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, rgba(243, 156, 18, 0.1) 0%, rgba(230, 126, 34, 0.1) 100%);
+    border: 1px solid rgba(243, 156, 18, 0.2);
+}
+
+.destiny-image-container.use-case-perk {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(39, 174, 96, 0.1) 100%);
+    border: 1px solid rgba(46, 204, 113, 0.2);
+}
+
+/* Hover Effects */
+.destiny-image-container:hover .destiny-image {
+    transform: scale(1.05);
+}
+
+.destiny-image-container.use-case-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Interactive States */
+.destiny-image-container.clickable {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.destiny-image-container.clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.destiny-image-container.clickable:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* High Quality Display */
+.destiny-image-container.high-quality .destiny-image {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .destiny-image-container.use-case-card {
+        width: 60px;
+        height: 60px;
+    }
+
+    .destiny-image-container.use-case-emblem {
+        width: 100px;
+        height: 50px;
+    }
+
+    .destiny-image-container.use-case-armor {
+        width: 56px;
+        height: 56px;
+    }
+
+    .destiny-image-container.use-case-weapon {
+        width: 70px;
+        height: 35px;
+    }
+}
+
+@media (max-width: 480px) {
+    .destiny-image-container.use-case-card {
+        width: 48px;
+        height: 48px;
+    }
+
+    .destiny-image-container.use-case-emblem {
+        width: 80px;
+        height: 40px;
+    }
+
+    .destiny-image-container.use-case-armor {
+        width: 48px;
+        height: 48px;
+    }
+
+    .destiny-image-container.use-case-weapon {
+        width: 60px;
+        height: 30px;
+    }
+
+    .destiny-image-container.use-case-perk {
+        width: 32px;
+        height: 32px;
+    }
+}

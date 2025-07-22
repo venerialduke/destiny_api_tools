@@ -34,8 +34,8 @@ def create_app(config_instance=None):
          methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
          allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'])
     
-    # Initialize security middleware
-    init_security_middleware(app)
+    # Initialize security middleware - temporarily disabled for debugging
+    # init_security_middleware(app)
     init_auth_middleware(app)
     
     # Register error handlers

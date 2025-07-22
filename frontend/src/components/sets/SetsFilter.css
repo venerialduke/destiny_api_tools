@@ -1,0 +1,233 @@
+/* Sets Filter Styles */
+
+.sets-filter {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.filter-section {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1fr;
+    gap: 24px;
+    align-items: end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #cccccc;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Class Filter Buttons */
+.class-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.class-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #cccccc;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-width: 0;
+    flex: 1;
+    justify-content: center;
+}
+
+.class-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.class-button.active {
+    background: rgba(74, 144, 226, 0.2);
+    border-color: #4a90e2;
+    color: #4a90e2;
+}
+
+.class-button.active .class-count {
+    background: #4a90e2;
+    color: white;
+}
+
+.class-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.class-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.class-count {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* Search Input */
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 16px;
+    padding-right: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.search-input::placeholder {
+    color: #888;
+}
+
+.search-icon {
+    position: absolute;
+    right: 12px;
+    color: #888;
+    pointer-events: none;
+    font-size: 1rem;
+}
+
+/* Sort Select */
+.sort-select {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sort-select:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.sort-select option {
+    background: #1a1a1a;
+    color: #ffffff;
+    padding: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .filter-section {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .class-buttons {
+        gap: 6px;
+    }
+
+    .class-button {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .sets-filter {
+        padding: 20px 16px;
+        margin-bottom: 20px;
+    }
+
+    .filter-section {
+        gap: 16px;
+    }
+
+    .class-buttons {
+        gap: 4px;
+    }
+
+    .class-button {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+        min-width: 80px;
+    }
+
+    .class-label {
+        display: none;
+    }
+
+    .search-input,
+    .sort-select {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .sets-filter {
+        padding: 16px 12px;
+    }
+
+    .class-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .class-button {
+        justify-content: flex-start;
+        padding: 10px 12px;
+    }
+
+    .class-label {
+        display: block;
+    }
+
+    .filter-label {
+        font-size: 0.85rem;
+    }
+}
