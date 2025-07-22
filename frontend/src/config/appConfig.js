@@ -32,7 +32,7 @@ class AppConfig {
     console.log('🔧 CONFIG: REACT_APP_API_URL from env:', process.env.REACT_APP_API_URL);
     
     this.api = {
-      baseURL: process.env.REACT_APP_API_URL || 'https://localhost:5001/api',
+      baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
       timeout: parseInt(process.env.REACT_APP_API_TIMEOUT) || 30000,
       retryAttempts: parseInt(process.env.REACT_APP_RETRY_ATTEMPTS) || 3,
       retryDelay: parseInt(process.env.REACT_APP_RETRY_DELAY) || 1000,

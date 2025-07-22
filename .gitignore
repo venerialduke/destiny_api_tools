@@ -135,3 +135,9 @@ docs/_build/
 data/manifest_raw/
 data/manifest_complete.db
 data/manifest_flattened.db
+backend/data/manifest_raw/
+backend/data/manifest_complete.db
+backend/data/manifest_flattened.db
+
+# Image cache (large cached image files)
+backend/data/images/

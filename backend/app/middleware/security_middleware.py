@@ -207,10 +207,10 @@ class RequestValidator:
                     status_code=400
                 )
         
-        # Validate JSON body if present
-        if request.is_json:
+        # Validate JSON body if present and there's actual content
+        if request.is_json and request.content_length and request.content_length > 0:
             try:
-                json_data = request.get_json()
+                json_data = request.get_json(force=True, silent=True)
                 if json_data:
                     json_str = str(json_data)
                     threats = cls.scan_for_threats(json_str)
@@ -222,12 +222,14 @@ class RequestValidator:
                             status_code=400
                         )
             except Exception as e:
-                logger.error(f"Error validating JSON: {str(e)}")
-                raise APIError(
-                    message="Invalid JSON data",
-                    code=ErrorCodes.INVALID_REQUEST,
-                    status_code=400
-                )
+                # Only raise error if there was actual content that failed to parse
+                if request.content_length and request.content_length > 0:
+                    logger.error(f"Error validating JSON: {str(e)}")
+                    raise APIError(
+                        message="Invalid JSON data",
+                        code=ErrorCodes.INVALID_REQUEST,
+                        status_code=400
+                    )
 
 
 class IPWhitelist:
