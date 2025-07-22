@@ -34,7 +34,8 @@
       "Bash(taskkill:*)",
       "Bash(head:*)",
       "Bash(grep:*)",
-      "Bash(tasklist:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
       "Bash(wmic process where:*)"
     ],
     "deny": []
